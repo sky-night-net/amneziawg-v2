@@ -106,6 +106,12 @@ new Vue({
       password: '',
     },
 
+    nodes: [],
+    selectedNodeId: 'local',
+    nodeAddDialog: false,
+    newNode: { name: '', url: '', token: '' },
+    nodeStatus: {},
+
     uiTrafficStats: false,
 
     uiChartType: 0,
@@ -114,6 +120,13 @@ new Vue({
       'gravatar': false,
     },
     enableOneTimeLinks: false,
+
+    nodes: [],
+    selectedNodeId: 'local',
+    nodeAddDialog: false,
+    newNode: { name: '', url: '', token: '' },
+    nodeStatus: {},
+
     enableSortClient: false,
     sortClient: true, // Sort clients by name, true = asc, false = desc
     enableExpireTime: false,
@@ -205,6 +218,37 @@ new Vue({
 
   },
   methods: {
+    loadNodes() {
+      this.api.getNodes().then(nodes => {
+        this.nodes = nodes;
+        this.nodes.forEach(node => {
+          this.api.getNodeStatus(node.id).then(status => {
+            this.$set(this.nodeStatus, node.id, status);
+          }).catch(() => {
+            this.$set(this.nodeStatus, node.id, { error: true });
+          });
+        });
+      });
+    },
+    selectNode(id) {
+      this.api.selectNode(id).then(() => {
+        location.reload();
+      });
+    },
+    addNode() {
+      if (!this.newNode.name || !this.newNode.url) return;
+      this.api.addNode(this.newNode).then(() => {
+        this.nodeAddDialog = false;
+        this.newNode = { name: '', url: '', token: '' };
+        this.loadNodes();
+      });
+    },
+    deleteNode(id) {
+      if (confirm('Delete this server?')) {
+        this.api.deleteNode(id).then(() => this.loadNodes());
+      }
+    },
+
     dateTime: (value) => {
       return new Intl.DateTimeFormat(undefined, {
         year: 'numeric',
@@ -548,6 +592,21 @@ new Vue({
       });
 
     Promise.resolve().then(async () => {
+      this.api.getSession().then(session => {
+        this.authenticated = session.authenticated;
+        this.requiresPassword = session.requiresPassword;
+        this.setupComplete = session.setupComplete;
+        this.selectedNodeId = session.selectedNodeId || 'local';
+        
+        if (this.authenticated) {
+          this.loadNodes();
+          this.refresh();
+        }
+      }).catch(err => {
+        this.authenticated = false;
+        this.setupComplete = true; // Default to true if API fails to avoid wizard loop
+      });
+
       const lang = await this.api.getLang();
       if (lang !== localStorage.getItem('lang') && i18n.availableLocales.includes(lang)) {
         localStorage.setItem('lang', lang);

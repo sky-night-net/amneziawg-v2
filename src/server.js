@@ -1,17 +1,22 @@
-'use strict';
+const { APP_MODE } = require('./config');
 
-require('./services/Server');
+if (APP_MODE === 'agent') {
+  require('./lib/Agent').start();
+} else {
+  // HUB MODE (Standard Dashboard)
+  require('./services/Server');
 
-const WireGuard = require('./services/WireGuard');
+  const WireGuard = require('./services/WireGuard');
 
-WireGuard.getConfig()
-  .catch((err) => {
-  // eslint-disable-next-line no-console
-    console.error(err);
+  WireGuard.getConfig()
+    .catch((err) => {
+      // eslint-disable-next-line no-console
+      console.error(err);
 
-    // eslint-disable-next-line no-process-exit
-    process.exit(1);
-  });
+      // eslint-disable-next-line no-process-exit
+      process.exit(1);
+    });
+}
 
 // Handle terminate signal
 process.on('SIGTERM', async () => {

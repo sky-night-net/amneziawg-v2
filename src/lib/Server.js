@@ -134,6 +134,53 @@ module.exports = class Server {
         }
       }))
 
+      // Nodes Management
+      .get('/api/nodes', defineEventHandler(async (event) => {
+        const NodeManager = require('./NodeManager');
+        const nodes = new NodeManager();
+        return await nodes.loadNodes();
+      }))
+      .post('/api/nodes', defineEventHandler(async (event) => {
+        const NodeManager = require('./NodeManager');
+        const nodes = new NodeManager();
+        const body = await readBody(event);
+        return await nodes.addNode(body);
+      }))
+      .delete('/api/nodes/:id', defineEventHandler(async (event) => {
+        const NodeManager = require('./NodeManager');
+        const nodes = new NodeManager();
+        const id = event.context.params.id;
+        return await nodes.removeNode(id);
+      }))
+      .post('/api/nodes/select', defineEventHandler(async (event) => {
+        const { id } = await readBody(event);
+        event.node.req.session.selectedNodeId = id;
+        event.node.req.session.save();
+        return { success: true };
+      }))
+      .get('/api/nodes/status/:id', defineEventHandler(async (event) => {
+        const id = event.context.params.id;
+        if (id === 'local') {
+           const os = require('os');
+           const clients = await WireGuard.getClients();
+           return {
+             os: {
+               uptime: os.uptime(),
+               load: os.loadavg(),
+               totalmem: os.totalmem(),
+               freemem: os.freemem(),
+             },
+             wireguard: {
+               clientCount: clients.length,
+               activeClients: clients.filter(c => c.latestHandshakeAt).length,
+             }
+           };
+        }
+        const NodeManager = require('./NodeManager');
+        const nodes = new NodeManager();
+        return await nodes.callAgent(id, '/api/agent/status');
+      }))
+
       // Authentication
       .get('/api/session', defineEventHandler(async (event) => {
         const config = await WireGuard.getConfig();
@@ -148,6 +195,7 @@ module.exports = class Server {
           requiresPassword: currentRequiresPassword,
           authenticated,
           setupComplete: config.server.setupComplete,
+          selectedNodeId: event.node.req.session.selectedNodeId || 'local',
         };
       }))
       .get('/api/setup-status', defineEventHandler(async () => {
@@ -249,6 +297,11 @@ module.exports = class Server {
     const router2 = createRouter();
     app.use(router2);
 
+    const getTarget = (event) => {
+      const nodeId = event.node.req.session.selectedNodeId || 'local';
+      return { nodeId, isLocal: nodeId === 'local' };
+    };
+
     router2
       .delete('/api/session', defineEventHandler((event) => {
         const sessionId = event.node.req.session.id;
@@ -258,46 +311,67 @@ module.exports = class Server {
         debug(`Deleted Session: ${sessionId}`);
         return { success: true };
       }))
-      .get('/api/awg-settings', defineEventHandler(async () => {
-        return WireGuard.getAwgSettings();
+      .get('/api/awg-settings', defineEventHandler(async (event) => {
+        const { nodeId, isLocal } = getTarget(event);
+        if (isLocal) return WireGuard.getAwgSettings();
+        const NodeManager = require('./NodeManager');
+        const config = await (new NodeManager()).callAgent(nodeId, '/api/agent/config');
+        return config.server;
       }))
       .put('/api/awg-settings', defineEventHandler(async (event) => {
         const settings = await readBody(event);
-        await WireGuard.updateAwgSettings(settings);
-        return { success: true };
+        const { nodeId, isLocal } = getTarget(event);
+        if (isLocal) {
+          await WireGuard.updateAwgSettings(settings);
+          return { success: true };
+        }
+        const NodeManager = require('./NodeManager');
+        return await (new NodeManager()).callAgent(nodeId, '/api/agent/awg-settings', 'post', settings);
       }))
-      .get('/api/wireguard/client', defineEventHandler(() => {
-        return WireGuard.getClients();
+      .get('/api/wireguard/client', defineEventHandler(async (event) => {
+        const { nodeId, isLocal } = getTarget(event);
+        if (isLocal) return WireGuard.getClients();
+        const NodeManager = require('./NodeManager');
+        return await (new NodeManager()).callAgent(nodeId, '/api/agent/clients');
       }))
       .get('/api/wireguard/client/:clientId/qrcode.svg', defineEventHandler(async (event) => {
+        const { nodeId, isLocal } = getTarget(event);
         const clientId = getRouterParam(event, 'clientId');
-        const svg = await WireGuard.getClientQRCodeSVG({ clientId });
-        setHeader(event, 'Content-Type', 'image/svg+xml');
-        return svg;
+        if (isLocal) {
+          const svg = await WireGuard.getClientQRCodeSVG({ clientId });
+          setHeader(event, 'Content-Type', 'image/svg+xml');
+          return svg;
+        }
+        const NodeManager = require('./NodeManager');
+        // Remote Agent QR code (SVG string)
+        return await (new NodeManager()).callAgent(nodeId, `/api/wireguard/client/${clientId}/qrcode.svg`);
       }))
       .get('/api/wireguard/client/:clientId/configuration', defineEventHandler(async (event) => {
+        const { nodeId, isLocal } = getTarget(event);
         const clientId = getRouterParam(event, 'clientId');
-        const client = await WireGuard.getClient({ clientId });
-        const config = await WireGuard.getClientConfiguration({ clientId });
-        const configName = client.name
-          .replace(/[^a-zA-Z0-9_=+.-]/g, '-')
-          .replace(/(-{2,}|-$)/g, '-')
-          .replace(/-$/, '')
-          .substring(0, 32);
-        setHeader(event, 'Content-Disposition', `attachment; filename="${configName || clientId}.conf"`);
+        if (isLocal) {
+          const client = await WireGuard.getClient({ clientId });
+          const config = await WireGuard.getClientConfiguration({ clientId });
+          const configName = client.name
+            .replace(/[^a-zA-Z0-9_=+.-]/g, '-')
+            .replace(/(-{2,}|-$)/g, '-')
+            .replace(/-$/, '')
+            .substring(0, 32);
+          setHeader(event, 'Content-Disposition', `attachment; filename="${configName || clientId}.conf"`);
+          setHeader(event, 'Content-Type', 'text/plain');
+          return config;
+        }
+        const NodeManager = require('./NodeManager');
+        const config = await (new NodeManager()).callAgent(nodeId, `/api/wireguard/client/${clientId}/configuration`);
         setHeader(event, 'Content-Type', 'text/plain');
         return config;
       }))
-      .post('/api/wireguard/client', defineEventHandler(async (event) => {
-        const { name } = await readBody(event);
-        const { expiredDate } = await readBody(event);
-        await WireGuard.createClient({ name, expiredDate });
-        return { success: true };
-      }))
       .delete('/api/wireguard/client/:clientId', defineEventHandler(async (event) => {
+        const { nodeId, isLocal } = getTarget(event);
         const clientId = getRouterParam(event, 'clientId');
-        await WireGuard.deleteClient({ clientId });
-        return { success: true };
+        if (isLocal) return await WireGuard.deleteClient({ clientId });
+        const NodeManager = require('./NodeManager');
+        return await (new NodeManager()).callAgent(nodeId, `/api/agent/clients/${clientId}`, 'delete');
       }))
       .post('/api/wireguard/client/:clientId/enable', defineEventHandler(async (event) => {
         const clientId = getRouterParam(event, 'clientId');

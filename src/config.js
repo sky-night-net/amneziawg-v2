@@ -44,6 +44,11 @@ module.exports.WG_ENABLE_EXPIRES_TIME = process.env.WG_ENABLE_EXPIRES_TIME || 'f
 module.exports.ENABLE_PROMETHEUS_METRICS = process.env.ENABLE_PROMETHEUS_METRICS || 'false';
 module.exports.PROMETHEUS_METRICS_PASSWORD = process.env.PROMETHEUS_METRICS_PASSWORD;
 
+// Multi-Node Hub / Agent Config
+module.exports.APP_MODE = process.env.APP_MODE || 'hub'; // hub or agent
+module.exports.AGENT_PORT = process.env.AGENT_PORT || '161'; // Standard SNMP port
+module.exports.HUB_TOKEN = process.env.HUB_TOKEN || 'amnezia-hub-secret';
+
 module.exports.DICEBEAR_TYPE = process.env.DICEBEAR_TYPE || false;
 module.exports.USE_GRAVATAR = process.env.USE_GRAVATAR || false;
 

@@ -229,4 +229,41 @@ class API {
     });
   }
 
+  async getNodes() {
+    return this.call({
+      method: 'get',
+      path: '/nodes',
+    });
+  }
+
+  async addNode(data) {
+    return this.call({
+      method: 'post',
+      path: '/nodes',
+      body: data,
+    });
+  }
+
+  async deleteNode(id) {
+    return this.call({
+      method: 'delete',
+      path: `/nodes/${id}`,
+    });
+  }
+
+  async selectNode(id) {
+    return this.call({
+      method: 'post',
+      path: '/nodes/select',
+      body: { id },
+    });
+  }
+
+  async getNodeStatus(id) {
+    return this.call({
+      method: 'get',
+      path: `/nodes/status/${id}`,
+    });
+  }
+
 }
