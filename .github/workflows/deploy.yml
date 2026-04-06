@@ -10,7 +10,7 @@ jobs:
   deploy:
     name: Build & Deploy
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'w0rng'
+    if: github.repository_owner == 'sky-night-net'
     permissions:
       packages: write
       contents: read
@@ -33,11 +33,11 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set environment variables
-      run: echo RELEASE=$(cat ./src/package.json | jq -r .release | jq -r .version) >> $GITHUB_ENV
+      run: echo RELEASE=$(cat ./src/package.json | jq -r .release.version) >> $GITHUB_ENV
 
     - name: Build & Publish Docker Image
       uses: docker/build-push-action@v6
       with:
         push: true
         platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8
-        tags: ghcr.io/w0rng/amnezia-wg-easy:latest, ghcr.io/w0rng/amnezia-wg-easy:${{ env.RELEASE }}
+        tags: ghcr.io/sky-night-net/amneziawg-v2:latest, ghcr.io/sky-night-net/amneziawg-v2:${{ env.RELEASE }}
