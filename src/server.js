@@ -1,22 +1,34 @@
-const { APP_MODE } = require('./config');
+const { AGENT_TOKEN, PORT } = require('./config');
+const Agent = require('./lib/Agent');
+const WireGuard = require('./services/WireGuard');
 
-if (APP_MODE === 'agent') {
-  require('./lib/Agent').start();
-} else {
-  // HUB MODE (Standard Dashboard)
-  require('./services/Server');
+// Print Universal Node Banner
+const printNodeBanner = () => {
+  console.log('\n' + '='.repeat(60));
+  console.log('🚀 AMNEZIAWG UNIVERSAL NODE IS READY');
+  console.log('='.repeat(60));
+  console.log(`🌍 Web UI Dashboard: http://your-server-ip:${PORT}`);
+  console.log(`🔑 SECRET AGENT TOKEN: ${AGENT_TOKEN}`);
+  console.log(`📡 Management Port: 161 (TCP)`);
+  console.log('='.repeat(60));
+  console.log('Use the SECRET AGENT TOKEN above to link this node to any other Hub.');
+  console.log('='.repeat(60) + '\n');
+};
 
-  const WireGuard = require('./services/WireGuard');
+// Start Agent Service (Port 161)
+Agent.start();
 
-  WireGuard.getConfig()
-    .catch((err) => {
-      // eslint-disable-next-line no-console
-      console.error(err);
+// Start Hub Service (Web UI + WireGuard)
+require('./services/Server');
 
-      // eslint-disable-next-line no-process-exit
-      process.exit(1);
-    });
-}
+WireGuard.getConfig()
+  .then(() => {
+    printNodeBanner();
+  })
+  .catch((err) => {
+    console.error('Failed to initialize WireGuard:', err);
+    process.exit(1);
+  });
 
 // Handle terminate signal
 process.on('SIGTERM', async () => {

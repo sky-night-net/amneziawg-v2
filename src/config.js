@@ -44,10 +44,30 @@ module.exports.WG_ENABLE_EXPIRES_TIME = process.env.WG_ENABLE_EXPIRES_TIME || 'f
 module.exports.ENABLE_PROMETHEUS_METRICS = process.env.ENABLE_PROMETHEUS_METRICS || 'false';
 module.exports.PROMETHEUS_METRICS_PASSWORD = process.env.PROMETHEUS_METRICS_PASSWORD;
 
+const fs = require('node:fs');
+const path = require('node:path');
+const crypto = require('node:crypto');
+
+const TOKEN_FILE = '/etc/amnezia-wg/agent_token.json';
+let agentToken = process.env.AGENT_TOKEN || process.env.HUB_TOKEN;
+
+if (!agentToken) {
+  try {
+    if (fs.existsSync(TOKEN_FILE)) {
+      const data = JSON.parse(fs.readFileSync(TOKEN_FILE, 'utf8'));
+      agentToken = data.token;
+    } else {
+      agentToken = crypto.randomBytes(16).toString('hex');
+      fs.writeFileSync(TOKEN_FILE, JSON.stringify({ token: agentToken }, null, 2), 'utf8');
+    }
+  } catch (err) {
+    agentToken = 'amnezia-default-token-error';
+  }
+}
+
 // Multi-Node Hub / Agent Config
-module.exports.APP_MODE = process.env.APP_MODE || 'hub'; // hub or agent
+module.exports.AGENT_TOKEN = agentToken;
 module.exports.AGENT_PORT = process.env.AGENT_PORT || '161'; // Standard SNMP port
-module.exports.HUB_TOKEN = process.env.HUB_TOKEN || 'amnezia-hub-secret';
 
 module.exports.DICEBEAR_TYPE = process.env.DICEBEAR_TYPE || false;
 module.exports.USE_GRAVATAR = process.env.USE_GRAVATAR || false;

@@ -14,7 +14,7 @@ const debug = require('debug')('Agent');
 
 const {
   AGENT_PORT,
-  HUB_TOKEN,
+  AGENT_TOKEN,
 } = require('../config');
 
 const WireGuard = require('./WireGuard');
@@ -27,7 +27,7 @@ const router = createRouter();
 app.use(
   fromNodeMiddleware((req, res, next) => {
     const auth = req.headers['authorization'];
-    if (!auth || auth !== `Bearer ${HUB_TOKEN}`) {
+    if (!auth || auth !== `Bearer ${AGENT_TOKEN}`) {
       res.statusCode = 401;
       return res.end(JSON.stringify({ error: 'Unauthorized Hub' }));
     }
