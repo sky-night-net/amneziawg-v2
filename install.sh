@@ -70,8 +70,9 @@ AGNT_PORT=${AGNT_PORT:-161}
 # 6. Развертывание контейнера
 echo -e "\n${BLUE}[5/5] Развертывание AmneziaWG Node...${NC}"
 
-# Принудительное обновление образа
-echo -e "${BLUE}Скачивание свежего образа...${NC}"
+# Очистка и принудительное обновление
+echo -e "${BLUE}Очистка кэша и скачивание свежего образа...${NC}"
+docker system prune -f >/dev/null
 docker pull ghcr.io/sky-night-net/amneziawg-v2:latest
 
 # Удаление старого контейнера если он есть

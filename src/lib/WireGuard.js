@@ -10,38 +10,7 @@ const CRC32 = require('crc-32');
 const Util = require('./Util');
 const ServerError = require('./ServerError');
 
-const {
-  WG_PATH,
-  WG_HOST,
-  WG_PORT,
-  WG_CONFIG_PORT,
-  WG_MTU,
-  WG_DEFAULT_DNS,
-  WG_DEFAULT_ADDRESS,
-  WG_PERSISTENT_KEEPALIVE,
-  WG_ALLOWED_IPS,
-  WG_PRE_UP,
-  WG_POST_UP,
-  WG_PRE_DOWN,
-  WG_POST_DOWN,
-  WG_ENABLE_EXPIRES_TIME,
-  WG_ENABLE_ONE_TIME_LINKS,
-  WG_DEVICE,
-  JC,
-  JMIN,
-  JMAX,
-  S1,
-  S2,
-  H1,
-  H2,
-  H3,
-  H4,
-  I1,
-  I2,
-  I3,
-  I4,
-  I5,
-} = require('../config');
+const Config = require('../config');
 
 module.exports = class WireGuard {
 
@@ -50,7 +19,7 @@ module.exports = class WireGuard {
       debug('Loading configuration...');
       let config;
       try {
-        config = await fs.readFile(path.join(WG_PATH, 'wg0.json'), 'utf8');
+        config = await fs.readFile(path.join(Config.WG_PATH, 'wg0.json'), 'utf8');
         config = JSON.parse(config);
         debug('Configuration loaded from wg0.json.');
       } catch (err) {
@@ -58,32 +27,32 @@ module.exports = class WireGuard {
         const publicKey = await Util.exec(`echo ${privateKey} | wg pubkey`, {
           log: 'echo ***hidden*** | wg pubkey',
         });
-        const address = WG_DEFAULT_ADDRESS.replace('x', '1');
+        const address = Config.WG_DEFAULT_ADDRESS.replace('x', '1');
 
         config = {
           server: {
             privateKey,
             publicKey,
             address,
-            jc: JC,
-            jmin: JMIN,
-            jmax: JMAX,
-            s1: S1,
-            s2: S2,
-            h1: H1,
-            h2: H2,
-            h3: H3,
-            h4: H4,
-            i1: I1,
-            i2: I2,
-            i3: I3,
-            i4: I4,
-            i5: I5,
-            host: WG_HOST,
-            port: WG_PORT,
-            device: WG_DEVICE,
+            jc: Config.JC,
+            jmin: Config.JMIN,
+            jmax: Config.JMAX,
+            s1: Config.S1,
+            s2: Config.S2,
+            h1: Config.H1,
+            h2: Config.H2,
+            h3: Config.H3,
+            h4: Config.H4,
+            i1: Config.I1,
+            i2: Config.I2,
+            i3: Config.I3,
+            i4: Config.I4,
+            i5: Config.I5,
+            host: Config.WG_HOST,
+            port: Config.WG_PORT,
+            device: Config.WG_DEVICE,
             passwordHash: null,
-            setupComplete: !!WG_HOST,
+            setupComplete: !!Config.WG_HOST,
           },
           clients: {},
         };
@@ -132,11 +101,11 @@ module.exports = class WireGuard {
 [Interface]
 PrivateKey = ${config.server.privateKey}
 Address = ${config.server.address}/24
-ListenPort = ${config.server.port || WG_PORT}
-PreUp = ${WG_PRE_UP}
-PostUp = ${WG_POST_UP}
-PreDown = ${WG_PRE_DOWN}
-PostDown = ${WG_POST_DOWN}
+ListenPort = ${config.server.port || Config.WG_PORT}
+PreUp = ${Config.WG_PRE_UP}
+PostUp = ${Config.WG_POST_UP}
+PreDown = ${Config.WG_PRE_DOWN}
+PostDown = ${Config.WG_POST_DOWN}
 Jc = ${config.server.jc}
 Jmin = ${config.server.jmin}
 Jmax = ${config.server.jmax}
@@ -161,10 +130,10 @@ ${client.preSharedKey ? `PresharedKey = ${client.preSharedKey}\n` : ''
     }
 
     debug('Config saving...');
-    await fs.writeFile(path.join(WG_PATH, 'wg0.json'), JSON.stringify(config, false, 2), {
+    await fs.writeFile(path.join(Config.WG_PATH, 'wg0.json'), JSON.stringify(config, false, 2), {
       mode: 0o660,
     });
-    await fs.writeFile(path.join(WG_PATH, 'wg0.conf'), result, {
+    await fs.writeFile(path.join(Config.WG_PATH, 'wg0.conf'), result, {
       mode: 0o600,
     });
     debug('Config saved.');
@@ -253,8 +222,8 @@ ${client.preSharedKey ? `PresharedKey = ${client.preSharedKey}\n` : ''
 [Interface]
 PrivateKey = ${client.privateKey ? `${client.privateKey}` : 'REPLACE_ME'}
 Address = ${client.address}/24
-${WG_DEFAULT_DNS ? `DNS = ${WG_DEFAULT_DNS}\n` : ''}\
-${WG_MTU ? `MTU = ${WG_MTU}\n` : ''}\
+${Config.WG_DEFAULT_DNS ? `DNS = ${Config.WG_DEFAULT_DNS}\n` : ''}\
+${Config.WG_MTU ? `MTU = ${Config.WG_MTU}\n` : ''}\
 Jc = ${config.server.jc}
 Jmin = ${config.server.jmin}
 Jmax = ${config.server.jmax}
@@ -268,15 +237,15 @@ ${config.server.i1 ? `I1 = ${config.server.i1}\n` : ''}${config.server.i2 ? `I2 
 [Peer]
 PublicKey = ${config.server.publicKey}
 ${client.preSharedKey ? `PresharedKey = ${client.preSharedKey}\n` : ''
-}AllowedIPs = ${WG_ALLOWED_IPS}
-PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}
-Endpoint = ${config.server.host}:${config.server.port || WG_CONFIG_PORT}`;
+}AllowedIPs = ${Config.WG_ALLOWED_IPS}
+PersistentKeepalive = ${Config.WG_PERSISTENT_KEEPALIVE}
+Endpoint = ${config.server.host}:${config.server.port || Config.WG_CONFIG_PORT}`;
   }
 
   async setupServer({ host, port, password }) {
     const config = await this.getConfig();
     config.server.host = host;
-    config.server.port = port || config.server.port || WG_PORT;
+    config.server.port = port || config.server.port || Config.WG_PORT;
     if (password) {
       const bcrypt = require('bcryptjs');
       config.server.passwordHash = bcrypt.hashSync(password, 10);
@@ -332,11 +301,11 @@ Endpoint = ${config.server.host}:${config.server.port || WG_CONFIG_PORT}`;
     let address;
     for (let i = 2; i < 255; i++) {
       const client = Object.values(config.clients).find((client) => {
-        return client.address === WG_DEFAULT_ADDRESS.replace('x', i);
+        return client.address === Config.WG_DEFAULT_ADDRESS.replace('x', i);
       });
 
       if (!client) {
-        address = WG_DEFAULT_ADDRESS.replace('x', i);
+        address = Config.WG_DEFAULT_ADDRESS.replace('x', i);
         break;
       }
     }
@@ -523,7 +492,7 @@ Endpoint = ${config.server.host}:${config.server.port || WG_CONFIG_PORT}`;
     const config = await this.getConfig();
     let needSaveConfig = false;
     // Expires Feature
-    if (WG_ENABLE_EXPIRES_TIME === 'true') {
+    if (Config.WG_ENABLE_EXPIRES_TIME === 'true') {
       for (const client of Object.values(config.clients)) {
         if (client.enabled !== true) continue;
         if (client.expiredAt !== null && new Date() > new Date(client.expiredAt)) {
@@ -535,7 +504,7 @@ Endpoint = ${config.server.host}:${config.server.port || WG_CONFIG_PORT}`;
       }
     }
     // One Time Link Feature
-    if (WG_ENABLE_ONE_TIME_LINKS === 'true') {
+    if (Config.WG_ENABLE_ONE_TIME_LINKS === 'true') {
       for (const client of Object.values(config.clients)) {
         if (client.oneTimeLink !== null && new Date() > new Date(client.oneTimeLinkExpiresAt)) {
           debug(`Client ${client.id} One Time Link expired.`);

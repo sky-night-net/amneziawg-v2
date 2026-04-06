@@ -15,12 +15,13 @@ const printNodeBanner = () => {
   console.log('='.repeat(60) + '\n');
 };
 
-// Start Agent Service (Port 161)
+// 1. Start Hub Service (Web UI)
+const ServerService = require('./services/Server');
+
+// 2. Start Agent Service (Port 161)
 Agent.start();
 
-// Start Hub Service (Web UI + WireGuard)
-require('./services/Server');
-
+// 3. Start WireGuard
 WireGuard.getConfig()
   .then(() => {
     printNodeBanner();
