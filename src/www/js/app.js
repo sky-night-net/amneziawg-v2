@@ -67,6 +67,12 @@ new Vue({
   data: {
     authenticated: null,
     authenticating: false,
+    setupComplete: true,
+    setupData: {
+      host: window.location.hostname,
+      port: 51820,
+      password: '',
+    },
     password: null,
     requiresPassword: null,
     remember: false,
@@ -92,6 +98,12 @@ new Vue({
     awgSettingsDialog: false,
     awgSettings: {
       jc: '', jmin: '', jmax: '', s1: '', s2: '', h1: '', h2: '', h3: '', h4: '', i1: '', i2: '', i3: '', i4: '', i5: ''
+    },
+    nodeSettingsDialog: false,
+    nodeSettings: {
+      host: '',
+      port: '',
+      password: '',
     },
 
     uiTrafficStats: false,
@@ -403,6 +415,38 @@ new Vue({
         })
         .catch(err => alert(err.message || err.toString()));
     },
+    setupServer() {
+      if (!this.setupData.host || !this.setupData.password) {
+        alert('Please fill in all fields');
+        return;
+      }
+      this.api.setupServer(this.setupData)
+        .then(() => {
+          location.reload();
+        })
+        .catch(err => alert(err.message || err.toString()));
+    },
+    openNodeSettings() {
+      this.api.getSession().then((res) => {
+        this.nodeSettings.host = this.setupData.host; // Use existing value or fetch from specialized API
+        this.nodeSettings.password = '';
+        this.nodeSettingsDialog = true;
+      });
+    },
+    saveNodeSettings() {
+      if (!this.nodeSettings.host) {
+        alert('Host is required');
+        return;
+      }
+      this.api.setupServer({
+        host: this.nodeSettings.host,
+        port: this.nodeSettings.port,
+        password: this.nodeSettings.password || undefined
+      }).then(() => {
+        this.nodeSettingsDialog = false;
+        alert('Settings saved. If you changed the host or password, you might need to re-login.');
+      }).catch(err => alert(err.message || err.toString()));
+    },
   },
   filters: {
     bytes,
@@ -428,11 +472,14 @@ new Vue({
       .then((session) => {
         this.authenticated = session.authenticated;
         this.requiresPassword = session.requiresPassword;
-        this.refresh({
-          updateCharts: this.updateCharts,
-        }).catch((err) => {
-          alert(err.message || err.toString());
-        });
+        this.setupComplete = session.setupComplete;
+        if (this.setupComplete) {
+          this.refresh({
+            updateCharts: this.updateCharts,
+          }).catch((err) => {
+            alert(err.message || err.toString());
+          });
+        }
       })
       .catch((err) => {
         alert(err.message || err.toString());

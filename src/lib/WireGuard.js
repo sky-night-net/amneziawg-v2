@@ -46,16 +46,12 @@ module.exports = class WireGuard {
 
   async __buildConfig() {
     this.__configPromise = Promise.resolve().then(async () => {
-      if (!WG_HOST) {
-        throw new Error('WG_HOST Environment Variable Not Set!');
-      }
-
       debug('Loading configuration...');
       let config;
       try {
         config = await fs.readFile(path.join(WG_PATH, 'wg0.json'), 'utf8');
         config = JSON.parse(config);
-        debug('Configuration loaded.');
+        debug('Configuration loaded from wg0.json.');
       } catch (err) {
         const privateKey = await Util.exec('wg genkey');
         const publicKey = await Util.exec(`echo ${privateKey} | wg pubkey`, {
@@ -82,10 +78,15 @@ module.exports = class WireGuard {
             i3: I3,
             i4: I4,
             i5: I5,
+            host: WG_HOST,
+            port: WG_PORT,
+            device: WG_DEVICE,
+            passwordHash: null,
+            setupComplete: !!WG_HOST,
           },
           clients: {},
         };
-        debug('Configuration generated.');
+        debug('Initial configuration generated.');
       }
 
       return config;
@@ -98,20 +99,18 @@ module.exports = class WireGuard {
     if (!this.__configPromise) {
       const config = await this.__buildConfig();
 
-      await this.__saveConfig(config);
-      await Util.exec('wg-quick down wg0').catch(() => {});
-      await Util.exec('wg-quick up wg0').catch((err) => {
-        if (err && err.message && err.message.includes('Cannot find device "wg0"')) {
-          throw new Error('WireGuard exited with the error: Cannot find device "wg0"\nThis usually means that your host\'s kernel does not support WireGuard!');
-        }
+      if (config.server.setupComplete) {
+        await this.__saveConfig(config);
+        await Util.exec('wg-quick down wg0').catch(() => {});
+        await Util.exec('wg-quick up wg0').catch((err) => {
+          if (err && err.message && err.message.includes('Cannot find device "wg0"')) {
+            throw new Error('WireGuard exited with the error: Cannot find device "wg0"\nThis usually means that your host\'s kernel does not support WireGuard!');
+          }
 
-        throw err;
-      });
-      // await Util.exec(`iptables -t nat -A POSTROUTING -s ${WG_DEFAULT_ADDRESS.replace('x', '0')}/24 -o ' + WG_DEVICE + ' -j MASQUERADE`);
-      // await Util.exec('iptables -A INPUT -p udp -m udp --dport 51820 -j ACCEPT');
-      // await Util.exec('iptables -A FORWARD -i wg0 -j ACCEPT');
-      // await Util.exec('iptables -A FORWARD -o wg0 -j ACCEPT');
-      await this.__syncConfig();
+          throw err;
+        });
+        await this.__syncConfig();
+      }
     }
 
     return this.__configPromise;
@@ -132,7 +131,7 @@ module.exports = class WireGuard {
 [Interface]
 PrivateKey = ${config.server.privateKey}
 Address = ${config.server.address}/24
-ListenPort = ${WG_PORT}
+ListenPort = ${config.server.port || WG_PORT}
 PreUp = ${WG_PRE_UP}
 PostUp = ${WG_POST_UP}
 PreDown = ${WG_PRE_DOWN}
@@ -270,7 +269,41 @@ PublicKey = ${config.server.publicKey}
 ${client.preSharedKey ? `PresharedKey = ${client.preSharedKey}\n` : ''
 }AllowedIPs = ${WG_ALLOWED_IPS}
 PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}
-Endpoint = ${WG_HOST}:${WG_CONFIG_PORT}`;
+Endpoint = ${config.server.host}:${config.server.port || WG_CONFIG_PORT}`;
+  }
+
+  async setupServer({ host, port, password }) {
+    const config = await this.getConfig();
+    config.server.host = host;
+    config.server.port = port || config.server.port || WG_PORT;
+    if (password) {
+      const bcrypt = require('bcryptjs');
+      config.server.passwordHash = bcrypt.hashSync(password, 10);
+    }
+    config.server.setupComplete = true;
+
+    await this.__saveConfig(config);
+    
+    // Start WireGuard
+    await Util.exec('wg-quick down wg0').catch(() => {});
+    await Util.exec('wg-quick up wg0').catch((err) => {
+      if (err && err.message && err.message.includes('Cannot find device "wg0"')) {
+        throw new Error('WireGuard exited with the error: Cannot find device "wg0"');
+      }
+      throw err;
+    });
+    await this.__syncConfig();
+    
+    this.__configPromise = Promise.resolve(config);
+    return { success: true };
+  }
+
+  async updatePassword({ password }) {
+    const config = await this.getConfig();
+    const bcrypt = require('bcryptjs');
+    config.server.passwordHash = bcrypt.hashSync(password, 10);
+    await this.saveConfig();
+    return { success: true };
   }
 
   async getClientQRCodeSVG({ clientId }) {

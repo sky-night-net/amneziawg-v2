@@ -92,6 +92,21 @@ class API {
     });
   }
 
+  async getSetupStatus() {
+    return this.call({
+      method: 'get',
+      path: '/setup-status',
+    });
+  }
+
+  async setupServer(data) {
+    return this.call({
+      method: 'post',
+      path: '/setup',
+      body: data,
+    });
+  }
+
   async createSession({ password, remember }) {
     return this.call({
       method: 'post',

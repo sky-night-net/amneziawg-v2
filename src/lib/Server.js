@@ -135,15 +135,33 @@ module.exports = class Server {
       }))
 
       // Authentication
-      .get('/api/session', defineEventHandler((event) => {
-        const authenticated = requiresPassword
+      .get('/api/session', defineEventHandler(async (event) => {
+        const config = await WireGuard.getConfig();
+        const effectiveHash = config.server.passwordHash || PASSWORD_HASH;
+        const currentRequiresPassword = !!effectiveHash;
+        
+        const authenticated = currentRequiresPassword
           ? !!(event.node.req.session && event.node.req.session.authenticated)
           : true;
 
         return {
-          requiresPassword,
+          requiresPassword: currentRequiresPassword,
           authenticated,
+          setupComplete: config.server.setupComplete,
         };
+      }))
+      .get('/api/setup-status', defineEventHandler(async () => {
+        const config = await WireGuard.getConfig();
+        return { setupComplete: config.server.setupComplete };
+      }))
+      .post('/api/setup', defineEventHandler(async (event) => {
+        const config = await WireGuard.getConfig();
+        if (config.server.setupComplete) {
+          throw createError({ status: 403, message: 'Setup already complete' });
+        }
+        const { host, port, password } = await readBody(event);
+        await WireGuard.setupServer({ host, port, password });
+        return { success: true };
       }))
       .get('/cnf/:clientOneTimeLink', defineEventHandler(async (event) => {
         if (WG_ENABLE_ONE_TIME_LINKS === 'false') {
@@ -165,17 +183,17 @@ module.exports = class Server {
       }))
       .post('/api/session', defineEventHandler(async (event) => {
         const { password, remember } = await readBody(event);
+        const config = await WireGuard.getConfig();
+        const effectiveHash = config.server.passwordHash || PASSWORD_HASH;
 
-        if (!requiresPassword) {
-          // if no password is required, the API should never be called.
-          // Do not automatically authenticate the user.
+        if (!effectiveHash) {
           throw createError({
             status: 401,
             message: 'Invalid state',
           });
         }
 
-        if (!isPasswordValid(password, PASSWORD_HASH)) {
+        if (!isPasswordValid(password, effectiveHash)) {
           throw createError({
             status: 401,
             message: 'Incorrect Password',
@@ -195,8 +213,17 @@ module.exports = class Server {
 
     // WireGuard
     app.use(
-      fromNodeMiddleware((req, res, next) => {
-        if (!requiresPassword || !req.url.startsWith('/api/')) {
+      fromNodeMiddleware(async (req, res, next) => {
+        const config = await WireGuard.getConfig();
+        const effectiveHash = config.server.passwordHash || PASSWORD_HASH;
+        const currentRequiresPassword = !!effectiveHash;
+
+        // Allow setup endpoints even if not authenticated
+        if (!config.server.setupComplete && (req.url === '/api/setup' || req.url === '/api/setup-status' || req.url === '/api/session')) {
+          return next();
+        }
+
+        if (!currentRequiresPassword || !req.url.startsWith('/api/')) {
           return next();
         }
 
@@ -205,7 +232,7 @@ module.exports = class Server {
         }
 
         if (req.url.startsWith('/api/') && req.headers['authorization']) {
-          if (isPasswordValid(req.headers['authorization'], PASSWORD_HASH)) {
+          if (isPasswordValid(req.headers['authorization'], effectiveHash)) {
             return next();
           }
           return res.status(401).json({
