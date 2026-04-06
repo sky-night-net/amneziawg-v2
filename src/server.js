@@ -26,8 +26,14 @@ WireGuard.getConfig()
     printNodeBanner();
   })
   .catch((err) => {
-    console.error('Failed to initialize WireGuard:', err);
-    process.exit(1);
+    console.error('\n' + '!'.repeat(60));
+    console.error('CRITICAL: Failed to initialize WireGuard interface');
+    console.error('Error:', err.message || err);
+    console.error('The Hub and Agent services are still running, but VPN features may be limited.');
+    console.error('!'.repeat(60) + '\n');
+    
+    // Still print the banner so user can see the token and UI port
+    printNodeBanner();
   });
 
 // Handle terminate signal

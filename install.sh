@@ -45,8 +45,17 @@ else
     echo -e "${GREEN}Docker уже установлен.${NC}"
 fi
 
-# 4. Выбор портов (Интерактивный режим)
-echo -e "\n${BLUE}[3/5] Настройка сетевых портов...${NC}"
+# 4. Подготовка системы (Ядро)
+echo -e "\n${BLUE}[3/5] Подготовка ядра системы...${NC}"
+modprobe wireguard || echo -e "${RED}Предупреждение: Не удалось загрузить модуль wireguard. Убедитесь, что он установлен на хосте.${NC}"
+modprobe tun || echo -e "${RED}Предупреждение: Не удалось загрузить модуль tun.${NC}"
+
+# Авто-определение сетевого интерфейса
+ETH_DEV=$(ip route get 8.8.8.8 | awk '{print $5; exit}')
+echo -e "${GREEN}Определен сетевой интерфейс: ${ETH_DEV}${NC}"
+
+# 5. Выбор портов (Интерактивный режим)
+echo -e "\n${BLUE}[4/5] Настройка сетевых портов...${NC}"
 echo -e "Нажмите ENTER, чтобы использовать значения по умолчанию."
 
 read -p "Порт Web UI (по умолчанию 51821): " GUI_PORT < /dev/tty
@@ -58,8 +67,8 @@ WG_PORT_VAL=${WG_PORT_VAL:-51820}
 read -p "Порт управления / Agent (по умолчанию 161): " AGNT_PORT < /dev/tty
 AGNT_PORT=${AGNT_PORT:-161}
 
-# 5. Развертывание контейнера
-echo -e "\n${BLUE}[4/5] Развертывание AmneziaWG Node...${NC}"
+# 6. Развертывание контейнера
+echo -e "\n${BLUE}[5/5] Развертывание AmneziaWG Node...${NC}"
 
 # Удаление старого контейнера если он есть
 if [ "$(docker ps -aq -f name=amnezia-node)" ]; then
@@ -75,6 +84,7 @@ docker run -d \
   -v ~/.amnezia-wg:/etc/amnezia-wg \
   -e WG_PORT=$WG_PORT_VAL \
   -e AGENT_PORT=$AGNT_PORT \
+  -e WG_DEVICE=$ETH_DEV \
   -p $WG_PORT_VAL:$WG_PORT_VAL/udp \
   -p $GUI_PORT:51821/tcp \
   -p $AGNT_PORT:$AGNT_PORT/tcp \
