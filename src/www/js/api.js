@@ -199,4 +199,19 @@ class API {
     });
   }
 
+  async getAwgSettings() {
+    return this.call({
+      method: 'get',
+      path: '/awg-settings',
+    });
+  }
+
+  async updateAwgSettings(settings) {
+    return this.call({
+      method: 'put',
+      path: '/awg-settings',
+      body: settings,
+    });
+  }
+
 }

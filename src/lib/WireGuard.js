@@ -35,6 +35,11 @@ const {
   H2,
   H3,
   H4,
+  I1,
+  I2,
+  I3,
+  I4,
+  I5,
 } = require('../config');
 
 module.exports = class WireGuard {
@@ -72,6 +77,11 @@ module.exports = class WireGuard {
             h2: H2,
             h3: H3,
             h4: H4,
+            i1: I1,
+            i2: I2,
+            i3: I3,
+            i4: I4,
+            i5: I5,
           },
           clients: {},
         };
@@ -136,7 +146,7 @@ H1 = ${config.server.h1}
 H2 = ${config.server.h2}
 H3 = ${config.server.h3}
 H4 = ${config.server.h4}
-`;
+${config.server.i1 ? `I1 = ${config.server.i1}\n` : ''}${config.server.i2 ? `I2 = ${config.server.i2}\n` : ''}${config.server.i3 ? `I3 = ${config.server.i3}\n` : ''}${config.server.i4 ? `I4 = ${config.server.i4}\n` : ''}${config.server.i5 ? `I5 = ${config.server.i5}\n` : ''}`;
 
     for (const [clientId, client] of Object.entries(config.clients)) {
       if (!client.enabled) continue;
@@ -254,7 +264,7 @@ H1 = ${config.server.h1}
 H2 = ${config.server.h2}
 H3 = ${config.server.h3}
 H4 = ${config.server.h4}
-
+${config.server.i1 ? `I1 = ${config.server.i1}\n` : ''}${config.server.i2 ? `I2 = ${config.server.i2}\n` : ''}${config.server.i3 ? `I3 = ${config.server.i3}\n` : ''}${config.server.i4 ? `I4 = ${config.server.i4}\n` : ''}${config.server.i5 ? `I5 = ${config.server.i5}\n` : ''}
 [Peer]
 PublicKey = ${config.server.publicKey}
 ${client.preSharedKey ? `PresharedKey = ${client.preSharedKey}\n` : ''
@@ -434,6 +444,45 @@ Endpoint = ${WG_HOST}:${WG_CONFIG_PORT}`;
   // Shutdown wireguard
   async Shutdown() {
     await Util.exec('wg-quick down wg0').catch(() => {});
+  }
+
+  async getAwgSettings() {
+    const config = await this.getConfig();
+    return {
+      jc: config.server.jc,
+      jmin: config.server.jmin,
+      jmax: config.server.jmax,
+      s1: config.server.s1,
+      s2: config.server.s2,
+      h1: config.server.h1,
+      h2: config.server.h2,
+      h3: config.server.h3,
+      h4: config.server.h4,
+      i1: config.server.i1 || '',
+      i2: config.server.i2 || '',
+      i3: config.server.i3 || '',
+      i4: config.server.i4 || '',
+      i5: config.server.i5 || '',
+    };
+  }
+
+  async updateAwgSettings(settings) {
+    const config = await this.getConfig();
+    config.server.jc = settings.jc;
+    config.server.jmin = settings.jmin;
+    config.server.jmax = settings.jmax;
+    config.server.s1 = settings.s1;
+    config.server.s2 = settings.s2;
+    config.server.h1 = settings.h1;
+    config.server.h2 = settings.h2;
+    config.server.h3 = settings.h3;
+    config.server.h4 = settings.h4;
+    config.server.i1 = settings.i1;
+    config.server.i2 = settings.i2;
+    config.server.i3 = settings.i3;
+    config.server.i4 = settings.i4;
+    config.server.i5 = settings.i5;
+    await this.saveConfig();
   }
 
   async cronJobEveryMinute() {

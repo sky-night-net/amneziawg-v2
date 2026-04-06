@@ -89,6 +89,11 @@ new Vue({
     currentRelease: null,
     latestRelease: null,
 
+    awgSettingsDialog: false,
+    awgSettings: {
+      jc: '', jmin: '', jmax: '', s1: '', s2: '', h1: '', h2: '', h3: '', h4: '', i1: '', i2: '', i3: '', i4: '', i5: ''
+    },
+
     uiTrafficStats: false,
 
     uiChartType: 0,
@@ -384,6 +389,19 @@ new Vue({
     },
     toggleCharts() {
       localStorage.setItem('uiShowCharts', this.uiShowCharts ? 1 : 0);
+    },
+    openAwgSettings() {
+      this.api.getAwgSettings().then((res) => {
+        this.awgSettings = res;
+        this.awgSettingsDialog = true;
+      }).catch(err => alert(err.message || err.toString()));
+    },
+    saveAwgSettings() {
+      this.api.updateAwgSettings(this.awgSettings)
+        .then(() => {
+          this.awgSettingsDialog = false;
+        })
+        .catch(err => alert(err.message || err.toString()));
     },
   },
   filters: {

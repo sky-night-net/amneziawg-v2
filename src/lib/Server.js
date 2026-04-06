@@ -231,6 +231,14 @@ module.exports = class Server {
         debug(`Deleted Session: ${sessionId}`);
         return { success: true };
       }))
+      .get('/api/awg-settings', defineEventHandler(async () => {
+        return WireGuard.getAwgSettings();
+      }))
+      .put('/api/awg-settings', defineEventHandler(async (event) => {
+        const settings = await readBody(event);
+        await WireGuard.updateAwgSettings(settings);
+        return { success: true };
+      }))
       .get('/api/wireguard/client', defineEventHandler(() => {
         return WireGuard.getClients();
       }))
