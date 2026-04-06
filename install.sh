@@ -23,7 +23,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # 2. Определение менеджера пакетов и установка базовых зависимостей
-echo -e "\n${BLUE}[1/4] Проверка системных зависимостей...${NC}"
+echo -e "\n${BLUE}[1/5] Проверка системных зависимостей...${NC}"
 if command -v apt-get >/dev/null; then
     apt-get update -y && apt-get install -y curl jq iptables
 elif command -v yum >/dev/null; then
@@ -33,7 +33,7 @@ else
 fi
 
 # 3. Проверка и установка Docker
-echo -e "\n${BLUE}[2/4] Проверка Docker...${NC}"
+echo -e "\n${BLUE}[2/5] Проверка Docker...${NC}"
 if ! command -v docker >/dev/null; then
     echo -e "${BLUE}Docker не найден. Начинаю установку...${NC}"
     curl -fsSL https://get.docker.com -o get-docker.sh
@@ -49,13 +49,13 @@ fi
 echo -e "\n${BLUE}[3/5] Настройка сетевых портов...${NC}"
 echo -e "Нажмите ENTER, чтобы использовать значения по умолчанию."
 
-read -p "Порт Web UI (по умолчанию 51821): " GUI_PORT
+read -p "Порт Web UI (по умолчанию 51821): " GUI_PORT < /dev/tty
 GUI_PORT=${GUI_PORT:-51821}
 
-read -p "Порт WireGuard UDP (по умолчанию 51820): " WG_PORT_VAL
+read -p "Порт WireGuard UDP (по умолчанию 51820): " WG_PORT_VAL < /dev/tty
 WG_PORT_VAL=${WG_PORT_VAL:-51820}
 
-read -p "Порт управления / Agent (по умолчанию 161): " AGNT_PORT
+read -p "Порт управления / Agent (по умолчанию 161): " AGNT_PORT < /dev/tty
 AGNT_PORT=${AGNT_PORT:-161}
 
 # 5. Развертывание контейнера
