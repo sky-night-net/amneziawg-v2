@@ -12,6 +12,7 @@
   <link rel="icon" href="./img/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="./img/apple-touch-icon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Professional AmneziaWG VPN Management Hub. Secure, high-performance, multi-node control panel.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
@@ -138,6 +139,21 @@
   @keyframes pulse-green {
     0%, 100% { box-shadow: 0 0 8px rgba(34,197,94,0.7), 0 0 16px rgba(34,197,94,0.3); }
     50% { box-shadow: 0 0 12px rgba(34,197,94,0.9), 0 0 24px rgba(34,197,94,0.5); }
+  }
+  @keyframes badge-pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; text-shadow: 0 0 8px rgba(74,222,128,0.5); }
+    100% { transform: scale(1); opacity: 0.8; }
+  }
+  .hub-badge {
+    font-size: 9px; 
+    background: rgba(34,197,94,0.15); 
+    color: #4ade80; 
+    padding: 1px 5px; 
+    border-radius: 4px; 
+    font-weight: 700;
+    border: 1px solid rgba(74,222,128,0.2);
+    animation: badge-pulse 2s infinite ease-in-out;
   }
 
   /* Avatar */
@@ -392,7 +408,7 @@
               <img src="./img/logo.svg" />
               <div>
                 <div class="brand">AmneziaWG</div>
-                <div class="section-label" style="margin-top:1px;">Multi-Node Hub</div>
+                <div class="section-label" style="margin-top:1px;">{{ selectedNode ? selectedNode.name : 'Multi-Node' }} Hub</div>
               </div>
             </div>
 
@@ -406,7 +422,7 @@
                   <div class="node-switcher-current" @click="nodeDropdownOpen = !nodeDropdownOpen">
                     <div class="name" style="display:flex; align-items:center; gap:6px;">
                       {{ selectedNode ? selectedNode.name : 'Loading...' }}
-                      <span v-if="selectedNode && selectedNode.url === 'local'" style="font-size:9px; background:rgba(34,197,94,0.2); color:#4ade80; padding:1px 5px; border-radius:4px; font-weight:600;">HUB</span>
+                      <span v-if="selectedNode && selectedNode.url === 'local'" class="hub-badge">HUB</span>
                     </div>
                     <div class="url" v-if="selectedNode && selectedNode.url !== 'local'">{{ selectedNode.url.replace(/^https?:\/\//, '').replace(/:[0-9]+$/, '') }}</div>
                     <div class="url" v-if="selectedNode && selectedNode.url === 'local'" style="color:rgba(74,222,128,0.5);">Этот сервер</div>
@@ -420,7 +436,7 @@
                          @click="selectNode(node.id); nodeDropdownOpen = false">
                       <span class="name" style="display:flex; align-items:center; gap:6px;">
                         {{ node.name }}
-                        <span v-if="node.url === 'local'" style="font-size:9px; background:rgba(34,197,94,0.2); color:#4ade80; padding:1px 5px; border-radius:4px;">HUB</span>
+                        <span v-if="node.url === 'local'" class="hub-badge">HUB</span>
                       </span>
                       <span class="url" v-if="node.url !== 'local'">{{ node.url }}</span>
                       <span class="url" v-else style="color:rgba(74,222,128,0.45);">Этот сервер (Hub)</span>
