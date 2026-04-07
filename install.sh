@@ -91,6 +91,9 @@ echo -e "${BLUE}Очистка кэша и скачивание свежего �
 docker system prune -f >/dev/null
 docker pull ghcr.io/sky-night-net/amneziawg-v2:latest
 
+# Подготовка директории для данных
+mkdir -p ~/.amnezia-wg
+
 # Удаление старого контейнера если он есть
 if [ "$(docker ps -aq -f name=amnezia-node)" ]; then
     echo -e "${BLUE}Обнаружен старый контейнер. Обновляю...${NC}"
