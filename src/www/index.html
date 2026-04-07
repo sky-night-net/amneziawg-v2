@@ -189,31 +189,56 @@
   .btn-header:hover { background: #4b5563; border-color: #6b7280; }
   .btn-header.primary { background: #5a5a5a; }
 
-  /* Client card */
+  /* Client card - List Style */
   .client-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-main);
-    border-radius: 16px;
-    padding: 16px 20px;
-    transition: all 0.25s;
-    margin-bottom: 8px;
+    transition: all 0.2s;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-main);
+    border-radius: 0;
+    margin-bottom: 0;
+    padding: 14px 22px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    min-height: 76px;
-    flex-wrap: wrap;
+    width: 100%;
   }
   .client-card:hover {
-    background: var(--card-hover);
-    border-color: rgba(220, 38, 38, 0.25);
-    transform: translateY(-1px);
-    box-shadow: var(--card-shadow);
+    background: rgba(255,255,255,0.02);
+  }
+  html.light .client-card:hover {
+    background: rgba(0,0,0,0.02);
   }
   @media (max-width: 600px) {
     .client-card { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .client-card .actions { width: 100%; justify-content: flex-end; }
   }
+
+  /* Avatar Style */
+  .avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: #ffffff;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+    color: #1e293b;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .avatar svg { width: 22px; height: 22px; opacity: 0.8; }
+  
+  .status-dot {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 2px solid #2e2e2e;
+    z-index: 2;
+  }
+  html.light .status-dot { border-color: #ffffff; }
+  
+  .status-dot.online { background: #22c55e; box-shadow: 0 0 10px rgba(34,197,94,0.5); }
+  .status-dot.offline { background: #64748b; }
 
   /* Status dot glow */
   .dot-online {
@@ -438,9 +463,11 @@
     height: 18px; width: 18px; left: 3px; bottom: 3px;
     background-color: white;
     border-radius: 50%; transition: .3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
   .toggle-switch input:checked + .toggle-slider {
-    background-color: #dc2626; /* Red */
+    background-color: #dc2626; /* Amnezia Red */
+    box-shadow: 0 0 10px rgba(220,38,38,0.2);
   }
   .toggle-switch input:checked + .toggle-slider:before {
     transform: translateX(20px);
