@@ -445,14 +445,12 @@
       <transition name="fade">
         <div v-if="setupComplete === true && authenticated === false"
              style="min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; position:relative; z-index:10;">
-          <div style="margin-bottom:40px; text-align:center;">
-            <div style="background:var(--btn-ghost-bg); width:80px; height:80px; border-radius:24px; display:flex; align-items:center; justify-content:center; margin:0 auto 24px; border:1px solid var(--border-main); box-shadow:var(--card-shadow);">
-              <img src="./img/logo.svg" width="48" />
-            </div>
-            <h1 style="font-size:36px; font-weight:800; background:var(--header-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-1.5px; margin:0;">AmneziaWG</h1>
-            <p style="font-size:14px; font-weight:500; color:var(--text-muted); margin-top:8px;">{{$t('appSubtitle') || 'Multi-Node VPN Hub'}}</p>
+          <div style="margin-bottom:48px; text-align:center;">
+            <img src="./img/logo.svg" width="64" style="margin-bottom:24px;" />
+            <h1 style="font-size:40px; font-weight:800; background:var(--header-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-1.5px; margin:0;">AmneziaWG</h1>
+            <p style="font-size:15px; font-weight:500; color:var(--text-muted); margin-top:8px;">{{$t('appSubtitle') || 'Multi-Node VPN Hub'}}</p>
           </div>
-          <div class="modal-box" style="max-width:400px; padding:32px;">
+          <div class="modal-box" style="max-width:380px; padding:32px;">
             <form @submit.prevent="login">
               <div style="margin-bottom:20px;">
                 <input type="password" v-model="password" :placeholder="$t('password')"
@@ -460,7 +458,7 @@
               </div>
               <div v-if="rememberMeEnabled" style="display:flex; align-items:center; gap:10px; margin-bottom:24px;">
                 <input type="checkbox" v-model="remember" id="rememberMe" style="width:16px; height:16px; accent-color:#dc2626; cursor:pointer;">
-                <label for="rememberMe" style="font-size:14px; color:var(--text-muted); cursor:pointer; font-weight:500;">{{$t('rememberMe')}}</label>
+                <label for="rememberMe" style="font-size:14px; color:var(--text-muted); cursor:pointer;">{{$t('rememberMe')}}</label>
               </div>
               <button type="submit" class="btn-primary" style="width:100%;"
                       :disabled="authenticating || !password">
@@ -479,7 +477,7 @@
 
         <!-- Header -->
         <div style="padding: 20px 28px 0; max-width: 900px; margin: 0 auto;">
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.06);">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding-bottom:20px; border-bottom:1px solid var(--border-main);">
 
             <!-- Brand -->
             <div class="header-logo">
@@ -659,24 +657,27 @@
       <!-- Create Client Modal -->
       <transition name="fade">
         <div v-if="clientCreate" class="modal-backdrop" @click.self="clientCreate = false">
-          <div class="modal-box">
-            <div style="padding:28px 28px 0;">
-              <h3 style="font-size:20px; font-weight:800; color:#ffffff; margin-bottom:6px;">{{$t('newClient')}}</h3>
-              <p style="font-size:13px; color:rgba(255,255,255,0.3); margin-bottom:24px;">{{$t('name')}}</p>
-              <div style="margin-bottom:14px;">
-                <input type="text" v-model="clientCreateName" :placeholder="$t('name')"
+          <div class="modal-box" style="max-width:440px;">
+            <div style="padding:32px 32px 24px;">
+              <h3 style="font-size:24px; font-weight:800; color:var(--text-main); margin-bottom:8px;">{{$t('newClient')}}</h3>
+              <p style="font-size:14px; color:var(--text-muted); margin-bottom:28px;">{{$t('name')}}</p>
+              
+              <div style="margin-bottom:24px;">
+                <input type="text" v-model="clientCreateName" :placeholder="$t('namePlaceholder') || $t('name')"
                        class="input-dark" @keyup.enter="createClient(); clientCreate = false;" autofocus>
               </div>
-              <div v-if="enableExpireTime" style="margin-bottom:14px;">
-                <div class="section-label" style="margin-bottom:6px;">{{$t('ExpireDate')}}</div>
+
+              <div v-if="enableExpireTime" style="margin-bottom:24px;">
+                <label class="section-label" style="margin-bottom:10px; display:block;">{{$t('ExpireDate')}}</label>
                 <input type="date" v-model="clientExpiredDate" class="input-dark">
               </div>
-            </div>
-            <div style="display:flex; gap:10px; padding:20px 28px 28px;">
-              <button @click="createClient(); clientCreate = false;" class="btn-primary" style="flex:1;">
-                {{$t('create')}}
-              </button>
-              <button @click="clientCreate = false" class="btn-ghost">{{$t('cancel')}}</button>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <button @click="createClient(); clientCreate = false;" class="btn-primary" :disabled="!clientCreateName">
+                  {{$t('create')}}
+                </button>
+                <button @click="clientCreate = false" class="btn-ghost">{{$t('cancel')}}</button>
+              </div>
             </div>
           </div>
         </div>
@@ -768,17 +769,17 @@
       <transition name="fade">
         <div v-if="awgSettingsDialog" class="modal-backdrop" @click.self="awgSettingsDialog = false">
           <div class="modal-box" style="max-width:480px;">
-            <div style="padding:28px;">
-              <h3 style="font-size:20px; font-weight:800; color:var(--text-main); margin-bottom:6px;">AmneziaWG Obfuscation</h3>
-              <p style="font-size:13px; color:var(--text-muted); margin-bottom:24px;">Junk/Handshake parameters</p>
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; max-height:50vh; overflow-y:auto;">
+            <div style="padding:32px;">
+              <h3 style="font-size:22px; font-weight:800; color:var(--text-main); margin-bottom:8px;">AmneziaWG Obfuscation</h3>
+              <p style="font-size:14px; color:var(--text-muted); margin-bottom:28px;">Junk/Handshake parameters</p>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; max-height:50vh; overflow-y:auto; padding-right:4px;">
                 <div v-for="key in ['jc','jmin','jmax','s1','s2','h1','h2','h3','h4','i1','i2','i3','i4','i5']" :key="key">
-                  <div class="section-label" style="margin-bottom:5px;">{{key}}</div>
-                  <input v-model="awgSettings[key]" type="text" class="input-dark" style="padding:9px 12px; font-size:13px;">
+                  <div class="section-label" style="margin-bottom:8px;">{{key}}</div>
+                  <input v-model="awgSettings[key]" type="text" class="input-dark">
                 </div>
               </div>
-              <div style="display:flex; gap:10px; margin-top:24px;">
-                <button @click="saveAwgSettings" class="btn-primary" style="flex:1;">{{$t('saveSettings')}}</button>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:32px;">
+                <button @click="saveAwgSettings" class="btn-primary">{{$t('saveSettings')}}</button>
                 <button @click="awgSettingsDialog = false" class="btn-ghost">{{$t('cancel')}}</button>
               </div>
             </div>
@@ -790,24 +791,24 @@
       <transition name="fade">
         <div v-if="nodeSettingsDialog" class="modal-backdrop" @click.self="nodeSettingsDialog = false">
           <div class="modal-box" style="max-width:420px;">
-            <div style="padding:28px;">
-              <h3 style="font-size:20px; font-weight:800; color:#ffffff; margin-bottom:24px;">{{$t('nodeSettings')}}</h3>
-              <div style="display:flex; flex-direction:column; gap:14px;">
+            <div style="padding:32px;">
+              <h3 style="font-size:22px; font-weight:800; color:var(--text-main); margin-bottom:28px;">{{$t('nodeSettings')}}</h3>
+              <div style="display:flex; flex-direction:column; gap:20px;">
                 <div>
-                  <div class="section-label" style="margin-bottom:6px;">{{$t('setupHost')}}</div>
+                  <div class="section-label" style="margin-bottom:8px;">{{$t('setupHost')}}</div>
                   <input v-model="nodeSettings.host" type="text" class="input-dark">
                 </div>
                 <div>
-                  <div class="section-label" style="margin-bottom:6px;">{{$t('setupPort')}}</div>
+                  <div class="section-label" style="margin-bottom:8px;">{{$t('setupPort')}}</div>
                   <input v-model="nodeSettings.port" type="number" class="input-dark">
                 </div>
                 <div>
-                  <div class="section-label" style="margin-bottom:6px;">{{$t('setupPassword')}} ({{$t('setupSubtitle_optional') || 'leave blank to keep current'}})</div>
+                  <div class="section-label" style="margin-bottom:8px;">{{$t('setupPassword')}} <span style="opacity:0.5; font-weight:400; text-transform:none; margin-left:4px;">({{ $t('setupSubtitle_optional') || 'opt' }})</span></div>
                   <input v-model="nodeSettings.password" type="password" class="input-dark">
                 </div>
               </div>
-              <div style="display:flex; gap:10px; margin-top:24px;">
-                <button @click="saveNodeSettings" class="btn-primary" style="flex:1;">{{$t('saveSettings')}}</button>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:32px;">
+                <button @click="saveNodeSettings" class="btn-primary">{{$t('saveSettings')}}</button>
                 <button @click="nodeSettingsDialog = false" class="btn-ghost">{{$t('cancel')}}</button>
               </div>
             </div>
