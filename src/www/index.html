@@ -15,6 +15,36 @@
   <meta name="description" content="Professional AmneziaWG VPN Management Hub. Secure, high-performance, multi-node control panel.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <script>
+    window.UI_ERRORS = [];
+    function reportUIError(type, msg, source, line, col, error) {
+      const entry = {
+        type: type || 'ERROR',
+        msg: msg || 'Unknown error',
+        time: new Date().toLocaleTimeString(),
+        stack: error ? error.stack : (new Error().stack)
+      };
+      window.UI_ERRORS.push(entry);
+      const logContainer = document.getElementById('debug-log-list');
+      if (logContainer) {
+        const div = document.createElement('div');
+        div.className = 'debug-entry ' + entry.type.toLowerCase();
+        div.innerHTML = `<strong>[${entry.time}] ${entry.type}:</strong> ${entry.msg}`;
+        div.onclick = () => alert(entry.stack);
+        logContainer.appendChild(div);
+        document.getElementById('debug-badge').style.display = 'flex';
+        document.getElementById('debug-badge-count').innerText = window.UI_ERRORS.length;
+      }
+    }
+    window.onerror = (m, s, l, c, e) => reportUIError('JS', m, s, l, c, e);
+    window.onunhandledrejection = (e) => reportUIError('REJECT', e.reason);
+    console.error = (function(old) {
+      return function() {
+        reportUIError('CONSOLE', Array.from(arguments).join(' '));
+        old.apply(console, arguments);
+      }
+    })(console.error);
+  </script>
 </head>
 
 <style>
@@ -472,6 +502,23 @@
   .slide-enter-active, .slide-leave-active { transition: all 0.25s; }
   .slide-enter { transform: translateY(10px); opacity: 0; }
   .slide-leave-to { transform: translateY(-10px); opacity: 0; }
+
+  /* Debug Console Styles */
+  #debug-monitor { position: fixed; bottom: 20px; right: 20px; z-index: 9999; font-family: monospace; }
+  #debug-badge { 
+    background: #dc2626; color: white; padding: 0 12px; height: 32px; border-radius: 16px; 
+    display: none; align-items: center; gap: 8px; cursor: pointer; font-size: 11px; font-weight: 800;
+    box-shadow: 0 4px 12px rgba(220,38,38,0.4); border: 2px solid white;
+  }
+  #debug-panel {
+    display: none; position: fixed; bottom: 65px; right: 20px; width: 350px; max-height: 400px;
+    background: #111118; border: 1px solid #dc2626; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    overflow: hidden; flex-direction: column;
+  }
+  #debug-log-list { padding: 10px; overflow-y: auto; flex: 1; font-size: 11px; line-height: 1.4; color: #fca5a5; }
+  .debug-entry { margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; cursor: pointer; }
+  .debug-entry:hover { color: white; }
+  .debug-entry.reject { color: #f97316; }
 </style>
 
 <body style="background:#0a0a0f; color: #e8e8f0;">
@@ -917,5 +964,20 @@
   <script src="./js/api.js"></script>
   <script src="./js/i18n.js"></script>
   <script src="./js/app.js"></script>
+
+  <!-- Universal Debug UI -->
+  <div id="debug-monitor">
+    <div id="debug-panel">
+      <div style="background:#dc2626; color:white; padding:8px 12px; font-size:11px; font-weight:800; display:flex; justify-content:space-between; align-items:center;">
+        <span>SYSTEM ERROR LOG</span>
+        <span onclick="document.getElementById('debug-panel').style.display='none'" style="cursor:pointer">✕</span>
+      </div>
+      <div id="debug-log-list"></div>
+    </div>
+    <div id="debug-badge" onclick="const p=document.getElementById('debug-panel'); p.style.display=p.style.display==='flex'?'none':'flex';">
+      <span>DEBUG</span>
+      <span id="debug-badge-count" style="background:white; color:#dc2626; border-radius:10px; padding:1px 6px; font-size:9px;">0</span>
+    </div>
+  </div>
 </body>
 </html>
