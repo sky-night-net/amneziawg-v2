@@ -224,8 +224,15 @@ ${client.preSharedKey ? `PresharedKey = ${client.preSharedKey}\n` : ''
 
   async getClient({ clientId }) {
     const config = await this.getConfig();
-    const client = config.clients[clientId];
+    let client = config.clients[clientId];
+
+    // Robust search fallback: If not found by key, search all values by id or name
     if (!client) {
+      client = Object.values(config.clients).find((c) => c.id === clientId || c.name === clientId);
+    }
+
+    if (!client) {
+      debug(`Client Not Found: ${clientId}`);
       throw new ServerError(`Client Not Found: ${clientId}`, 404);
     }
 

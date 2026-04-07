@@ -396,6 +396,7 @@ module.exports = class Server {
         const clientId = getRouterParam(event, 'clientId');
         if (isLocal) {
           const client = await WireGuard.getClient({ clientId });
+          debug(`Fetching configuration for client: ${client.id} (${client.name})`);
           const config = await WireGuard.getClientConfiguration({ clientId });
           const configName = client.name
             .replace(/[^a-zA-Z0-9_=+.-]/g, '-')
@@ -636,12 +637,14 @@ module.exports = class Server {
       }))
       .get('/api/agent/clients/:clientId/qrcode.svg', defineEventHandler(async (event) => {
       const clientId = getRouterParam(event, 'clientId');
+      console.log(`[AGENT] QR Code request for: ${clientId}`);
       const svg = await WireGuard.getClientQRCodeSVG({ clientId });
       setHeader(event, 'Content-Type', 'image/svg+xml');
       return svg;
     }))
     .get('/api/agent/clients/:clientId/configuration', defineEventHandler(async (event) => {
       const clientId = getRouterParam(event, 'clientId');
+      console.log(`[AGENT] Config download for: ${clientId}`);
       return await WireGuard.getClientConfiguration({ clientId });
     }))
     .post('/api/agent/awg-settings', defineEventHandler(async (event) => {
