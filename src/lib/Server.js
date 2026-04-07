@@ -158,8 +158,8 @@ module.exports = class Server {
         event.node.req.session.save();
         return { success: true };
       }))
-      .get('/api/nodes/status/:id', defineEventHandler(async (event) => {
-        const id = event.context.params.id;
+      .get('/api/status', defineEventHandler(async (event) => {
+        const id = getCookie(event, 'node-id') || 'local';
         if (id === 'local') {
            const os = require('os');
            const clients = await WireGuard.getClients();
@@ -176,9 +176,29 @@ module.exports = class Server {
              }
            };
         }
-        const NodeManager = require('./NodeManager');
-        const nodes = new NodeManager();
-        return await nodes.callAgent(id, '/api/agent/status');
+        
+        try {
+          const NodeManager = require('./NodeManager');
+          const nodes = new NodeManager();
+          return await nodes.callAgent(id, '/api/agent/status');
+        } catch (e) {
+          // If the node cookie represents a deleted node, clear it and return local stats
+          deleteCookie(event, 'node-id');
+          const os = require('os');
+          const clients = await WireGuard.getClients();
+          return {
+            os: {
+              uptime: os.uptime(),
+              load: os.loadavg(),
+              totalmem: os.totalmem(),
+              freemem: os.freemem(),
+            },
+            wireguard: {
+              clientCount: clients.length,
+              activeClients: clients.filter(c => c.latestHandshakeAt).length,
+            }
+          };
+        }
       }))
 
       // Authentication

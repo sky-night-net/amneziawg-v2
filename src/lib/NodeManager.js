@@ -58,6 +58,7 @@ module.exports = class NodeManager {
   }
 
   async getNode(id) {
+    if (this.nodes.length <= 1) await this.loadNodes();
     const node = this.nodes.find(n => n.id === id);
     if (!node) throw new Error(`Node not found: ${id}`);
     return node;

@@ -21,7 +21,7 @@
   [v-cloak] { display: none; }
 
   body {
-    background: #0a0a0f;
+    background: var(--bg-body);
     min-height: 100vh;
   }
 
@@ -55,7 +55,7 @@
   /* Input styling */
   .input-dark {
     background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid var(--border-strong);
     color: #e8e8f0;
     border-radius: 12px;
     padding: 12px 16px;
@@ -91,8 +91,8 @@
   .btn-primary:active { transform: translateY(0); }
 
   .btn-ghost {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--node-select-bg);
+    border: 1px solid var(--border-strong);
     color: rgba(255,255,255,0.7);
     border-radius: 10px;
     padding: 10px 18px;
@@ -108,18 +108,18 @@
 
   /* Client card */
   .client-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
     border-radius: 16px;
     padding: 16px 20px;
     transition: all 0.25s;
     margin-bottom: 8px;
   }
   .client-card:hover {
-    background: rgba(255,255,255,0.055);
+    background: var(--bg-card-hover);
     border-color: rgba(220, 38, 38, 0.25);
     transform: translateY(-1px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 32px var(--input-bg);
   }
 
   /* Status dot glow */
@@ -175,7 +175,7 @@
   /* Scrollbar */
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
 
   /* Modal backdrop */
   .modal-backdrop {
@@ -185,8 +185,8 @@
     display: flex; align-items: center; justify-content: center; padding: 20px;
   }
   .modal-box {
-    background: #111118;
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--bg-modal);
+    border: 1px solid var(--border-strong);
     border-radius: 24px;
     width: 100%; max-width: 480px;
     box-shadow: 0 32px 80px rgba(0,0,0,0.6);
@@ -198,46 +198,74 @@
     width: 34px; height: 34px;
     display: flex; align-items: center; justify-content: center;
     border-radius: 10px;
-    background: rgba(255,255,255,0.05);
+    background: var(--node-select-bg);
     border: 1px solid rgba(255,255,255,0.08);
     color: rgba(255,255,255,0.6);
     cursor: pointer; transition: all 0.2s;
   }
-  .icon-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+  .icon-btn:hover { background: var(--border-strong); color: white; }
   .icon-btn.danger:hover { background: rgba(220,38,38,0.15); color: #fca5a5; border-color: rgba(220,38,38,0.3); }
   .icon-btn.active { background: rgba(220,38,38,0.15); color: #fca5a5; border-color: rgba(220,38,38,0.3); }
 
   /* Section header */
   .section-label {
     font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 1.2px; color: rgba(255,255,255,0.3);
+    letter-spacing: 1.2px; color: var(--text-dim);
   }
 
   /* Empty state */
   .empty-state {
     text-align: center; padding: 60px 20px;
-    color: rgba(255,255,255,0.3);
+    color: var(--text-dim);
   }
   .empty-state p { font-size: 14px; margin-top: 12px; }
 
-  /* Node selector */
-  .node-select {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
+  /* Node selector (Custom Dropdown) */
+  .node-switcher {
+    position: relative;
+    user-select: none;
+    z-index: 50;
+  }
+  .node-switcher-current {
+    background: var(--node-select-bg);
+    border: 1px solid var(--border-strong);
     border-radius: 10px;
-    color: #ffffff; /* Explicitly set to white for Safari */
-    font-size: 13px; font-weight: 600;
     padding: 8px 32px 8px 14px;
-    appearance: none;
-    -webkit-appearance: none;
     cursor: pointer;
-    outline: none;
+    min-width: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: all 0.2s;
   }
-  .node-select:focus { border-color: rgba(220,38,38,0.5); }
-  .node-select option {
-    background-color: #111118;
-    color: #ffffff;
+  .node-switcher-current:hover { border-color: rgba(220,38,38,0.5); }
+  .node-switcher-current .name { font-size: 13px; font-weight: 700; color: var(--text-main); }
+  .node-switcher-current .url { font-size: 10px; color: var(--text-dim); margin-top: 1px; }
+  
+  .node-switcher-list {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0; right: 0;
+    background: var(--bg-modal);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    overflow: hidden;
+    animation: slide-up 0.2s ease-out;
   }
+  @keyframes slide-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .node-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-light);
+    transition: background 0.2s;
+  }
+  .node-item:last-child { border-bottom: none; }
+  .node-item:hover { background: var(--bg-card-hover); }
+  .node-item.active { background: rgba(220,38,38,0.1); border-left: 3px solid #dc2626; }
+  .node-item .name { font-size: 13px; font-weight: 600; color: var(--text-main); display: block; }
+  .node-item .url { font-size: 10px; color: var(--text-dim); display: block; margin-top: 2px; }
 
   /* Toggle Switch */
   .toggle-switch {
@@ -250,7 +278,7 @@
   .toggle-switch input { display: none; }
   .toggle-slider {
     position: absolute; inset: 0;
-    background-color: rgba(255,255,255,0.15);
+    background-color: var(--toggle-bg);
     border-radius: 24px; transition: .3s;
     border: 1px solid rgba(255,255,255,0.08);
   }
@@ -259,7 +287,7 @@
     height: 18px; width: 18px; left: 2px; bottom: 2px;
     background-color: white;
     border-radius: 50%; transition: .3s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 4px var(--input-bg);
   }
   .toggle-switch input:checked + .toggle-slider {
     background-color: #10b981; /* Green */
@@ -278,7 +306,7 @@
   .slide-leave-to { transform: translateY(-10px); opacity: 0; }
 </style>
 
-<body style="background:#0a0a0f; color: #e8e8f0;">
+<body style="background:var(--bg-body); color: #e8e8f0;">
   <div class="bg-mesh"></div>
 
   <div id="app">
@@ -293,7 +321,7 @@
             <div style="padding: 40px 36px;">
               <div style="text-align:center; margin-bottom:32px;">
                 <img src="./img/logo.svg" width="60" style="margin: 0 auto 16px;" />
-                <h2 style="font-size:24px; font-weight:800; color:#fff; margin-bottom:8px;">{{$t('setupTitle')}}</h2>
+                <h2 style="font-size:24px; font-weight:800; color:var(--text-main); margin-bottom:8px;">{{$t('setupTitle')}}</h2>
                 <p style="font-size:14px; color:rgba(255,255,255,0.4); line-height:1.6;">{{$t('setupSubtitle')}}</p>
               </div>
               <div style="display:flex; flex-direction:column; gap:14px;">
@@ -326,8 +354,8 @@
              style="min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px;">
           <div style="margin-bottom:32px; text-align:center;">
             <img src="./img/logo.svg" width="72" style="margin:0 auto 16px;" />
-            <h1 style="font-size:32px; font-weight:800; background:linear-gradient(135deg,#fff,rgba(255,255,255,0.5)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-1px;">AmneziaWG</h1>
-            <p style="font-size:13px; color:rgba(255,255,255,0.3); margin-top:6px;">Multi-Node VPN Hub</p>
+            <h1 style="font-size:32px; font-weight:800; background:linear-gradient(135deg,#fff,var(--text-muted)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-1px;">AmneziaWG</h1>
+            <p style="font-size:13px; color:var(--text-dim); margin-top:6px;">Multi-Node VPN Hub</p>
           </div>
           <div class="modal-box" style="max-width:360px;">
             <form @submit="login" style="padding:32px;">
@@ -338,7 +366,7 @@
               </div>
               <div v-if="rememberMeEnabled" style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
                 <input type="checkbox" v-model="remember" id="rememberMe" style="accent-color:#dc2626;">
-                <label for="rememberMe" style="font-size:13px; color:rgba(255,255,255,0.5); cursor:pointer;">{{$t('rememberMe')}}</label>
+                <label for="rememberMe" style="font-size:13px; color:var(--text-muted); cursor:pointer;">{{$t('rememberMe')}}</label>
               </div>
               <button type="submit" class="btn-primary" style="width:100%;"
                       :disabled="authenticating || !password" :style="(authenticating || !password) ? 'opacity:0.5; cursor:not-allowed;' : ''">
@@ -357,7 +385,7 @@
 
         <!-- Header -->
         <div style="padding: 20px 28px 0; max-width: 900px; margin: 0 auto;">
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.06);">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding-bottom:20px; border-bottom:1px solid var(--border-light);">
 
             <!-- Brand -->
             <div class="header-logo">
@@ -371,14 +399,27 @@
             <!-- Right controls -->
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
 
-              <!-- Node Selector -->
+              <!-- Node Selector (Custom) -->
               <div v-if="authenticated" style="display:flex; align-items:center; gap:8px; padding-right:10px; border-right:1px solid rgba(255,255,255,0.08);">
                 <div class="section-label">{{$t('servers')}}:</div>
-                <div style="position:relative;">
-                  <select v-model="selectedNodeId" @change="selectNode(selectedNodeId)" class="node-select">
-                    <option v-for="node in nodes" :key="node.id" :value="node.id">{{ node.name }}</option>
-                  </select>
-                  <svg style="position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;width:12px;height:12px;color:rgba(255,255,255,0.4);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                <div class="node-switcher">
+                  <div class="node-switcher-current" @click="nodeDropdownOpen = !nodeDropdownOpen">
+                    <div class="name">{{ selectedNode ? selectedNode.name : '...' }}</div>
+                    <div class="url" v-if="selectedNode && selectedNode.url !== 'local'">{{ selectedNode.url.replace(/^https?:\/\//, '').replace(/:[0-9]+$/, '') }}</div>
+                    <svg style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;width:14px;height:14px;color:rgba(255,255,255,0.4);" 
+                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div v-if="nodeDropdownOpen" class="node-switcher-list">
+                    <div v-for="node in nodes" :key="node.id" class="node-item" :class="node.id === selectedNodeId ? 'active' : ''"
+                         @click="selectNode(node.id); nodeDropdownOpen = false">
+                      <span class="name">{{ node.name }}</span>
+                      <span class="url" v-if="node.url !== 'local'">{{ node.url }}</span>
+                    </div>
+                  </div>
+                  <!-- Click overlay to close dropdown -->
+                  <div v-if="nodeDropdownOpen" @click="nodeDropdownOpen = false" style="position:fixed; inset:0; z-index:-1;"></div>
                 </div>
                 <button @click="nodeAddDialog = true" class="icon-btn" :title="$t('addNode')">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
@@ -413,7 +454,7 @@
           <div v-if="latestRelease" style="margin-bottom:20px; background:rgba(220,38,38,0.1); border:1px solid rgba(220,38,38,0.3); border-radius:14px; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
             <div>
               <div style="font-weight:700; font-size:13px; color:#fca5a5;">🔄 {{$t('updateAvailable')}}</div>
-              <div style="font-size:12px; color:rgba(255,255,255,0.5); margin-top:2px;">{{latestRelease.changelog}}</div>
+              <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">{{latestRelease.changelog}}</div>
             </div>
             <a href="https://github.com/wg-easy/wg-easy#updating" target="_blank" class="btn-primary" style="padding:8px 16px; font-size:12px; text-decoration:none; white-space:nowrap;">
               {{$t('update')}}
@@ -423,9 +464,9 @@
           <!-- Client Panel -->
           <div class="glass" style="border-radius:20px; overflow:hidden;">
             <!-- Panel Header -->
-            <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid rgba(255,255,255,0.06);">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid var(--border-light);">
               <div style="display:flex; align-items:center; gap:12px;">
-                <span style="font-size:18px; font-weight:700; color:#fff;">{{$t('clients')}}</span>
+                <span style="font-size:18px; font-weight:700; color:var(--text-main);">{{$t('clients')}}</span>
                 <span class="badge" v-if="clients">{{clients.length}}</span>
               </div>
               <div style="display:flex; gap:8px; align-items:center;">
@@ -453,11 +494,11 @@
                         <span v-else>{{ client.name[0].toUpperCase() }}</span>
                       </div>
                       <div style="min-width:0;">
-                        <div style="font-weight:600; font-size:15px; color:#fff; display:flex; align-items:center; gap:8px;">
+                        <div style="font-weight:600; font-size:15px; color:var(--text-main); display:flex; align-items:center; gap:8px;">
                           <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ client.name }}</span>
                           <div :class="client.latestHandshakeAt ? 'dot-online' : 'dot-offline'" style="flex-shrink:0;"></div>
                         </div>
-                        <div style="font-size:12px; color:rgba(255,255,255,0.35); margin-top:2px;">{{ client.address }}</div>
+                        <div style="font-size:12px; color:var(--text-dim); margin-top:2px;">{{ client.address }}</div>
                         <div v-if="client.latestHandshakeAt" style="font-size:11px; color:rgba(255,255,255,0.25);">{{ client.latestHandshakeAt | timeago }}</div>
                       </div>
                     </div>
@@ -495,7 +536,7 @@
 
               <!-- Empty state -->
               <div v-if="clients !== null && clients.length === 0" class="empty-state">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" style="width:56px;height:56px;margin:0 auto;color:rgba(255,255,255,0.15);"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" style="width:56px;height:56px;margin:0 auto;color:var(--toggle-bg);"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
                 <p>{{$t('noClients')}}</p>
               </div>
 
@@ -518,8 +559,8 @@
         <div v-if="clientCreate" class="modal-backdrop" @click.self="clientCreate = false">
           <div class="modal-box">
             <div style="padding:28px 28px 0;">
-              <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:6px;">{{$t('newClient')}}</h3>
-              <p style="font-size:13px; color:rgba(255,255,255,0.35); margin-bottom:24px;">{{$t('name')}}</p>
+              <h3 style="font-size:20px; font-weight:800; color:var(--text-main); margin-bottom:6px;">{{$t('newClient')}}</h3>
+              <p style="font-size:13px; color:var(--text-dim); margin-bottom:24px;">{{$t('name')}}</p>
               <div style="margin-bottom:14px;">
                 <input type="text" v-model="clientCreateName" :placeholder="$t('name')"
                        class="input-dark" @keyup.enter="createClient(); clientCreate = false;" autofocus>
@@ -547,7 +588,7 @@
               <div style="width:48px;height:48px;background:rgba(220,38,38,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#fca5a5" style="width:24px;height:24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
               </div>
-              <h3 style="font-size:18px; font-weight:700; color:#fff; margin-bottom:8px;">{{$t('deleteClient')}}</h3>
+              <h3 style="font-size:18px; font-weight:700; color:var(--text-main); margin-bottom:8px;">{{$t('deleteClient')}}</h3>
               <p style="font-size:13px; color:rgba(255,255,255,0.45); line-height:1.7; margin-bottom:24px;">
                 {{$t('deleteDialog1')}} <strong style="color:#fca5a5;">{{ clientDelete && clientDelete.name }}</strong>? {{$t('deleteDialog2')}}
               </p>
@@ -566,7 +607,7 @@
       <transition name="fade">
         <div v-if="qrcode" class="modal-backdrop" @click="qrcode = null">
           <div class="modal-box" style="max-width:340px; padding:28px; text-align:center;" @click.stop>
-            <p style="font-size:13px; font-weight:600; color:rgba(255,255,255,0.5); margin-bottom:20px; text-transform:uppercase; letter-spacing:1px;">{{$t('showQR')}}</p>
+            <p style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:20px; text-transform:uppercase; letter-spacing:1px;">{{$t('showQR')}}</p>
             <div style="background:white; border-radius:16px; padding:20px; margin-bottom:20px;">
               <img :src="qrcode" style="width:100%; display:block;">
             </div>
@@ -580,8 +621,8 @@
         <div v-if="nodeAddDialog" class="modal-backdrop" @click.self="nodeAddDialog = false">
           <div class="modal-box" style="max-width:500px;">
             <div style="padding:28px 28px 20px;">
-              <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:6px;">{{$t('servers')}}</h3>
-              <p style="font-size:13px; color:rgba(255,255,255,0.35); margin-bottom:20px;">Management Port 161 (TCP)</p>
+              <h3 style="font-size:20px; font-weight:800; color:var(--text-main); margin-bottom:6px;">{{$t('servers')}}</h3>
+              <p style="font-size:13px; color:var(--text-dim); margin-bottom:20px;">Management Port 161 (TCP)</p>
 
               <!-- Node list -->
               <div style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; margin-bottom:20px;">
@@ -590,8 +631,8 @@
                   <div style="display:flex; align-items:center; gap:10px;">
                     <div :class="nodeStatus[node.id] && !nodeStatus[node.id].error ? 'dot-online' : 'dot-offline'"></div>
                     <div>
-                      <div style="font-size:13px; font-weight:600; color:#fff;">{{ node.name }}</div>
-                      <div style="font-size:11px; color:rgba(255,255,255,0.3);">{{ node.url === 'local' ? $t('localNode') : node.url }}</div>
+                      <div style="font-size:13px; font-weight:600; color:var(--text-main);">{{ node.name }}</div>
+                      <div style="font-size:11px; color:var(--text-dim);">{{ node.url === 'local' ? $t('localNode') : node.url }}</div>
                     </div>
                   </div>
                   <button v-if="node.id !== 'local'" @click="deleteNode(node.id)" class="icon-btn danger" style="width:28px;height:28px;">
@@ -601,7 +642,7 @@
               </div>
 
               <!-- Add new node -->
-              <div style="padding:18px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:14px;">
+              <div style="padding:18px; background:var(--bg-card); border:1px solid rgba(255,255,255,0.07); border-radius:14px;">
                 <div class="section-label" style="margin-bottom:12px;">{{$t('addNode')}}</div>
                 <div style="display:flex; flex-direction:column; gap:10px;">
                   <input type="text" v-model="newNode.name" :placeholder="$t('name')" class="input-dark">
@@ -625,8 +666,8 @@
         <div v-if="awgSettingsDialog" class="modal-backdrop" @click.self="awgSettingsDialog = false">
           <div class="modal-box" style="max-width:480px;">
             <div style="padding:28px;">
-              <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:6px;">AmneziaWG Obfuscation</h3>
-              <p style="font-size:13px; color:rgba(255,255,255,0.35); margin-bottom:24px;">Junk/Handshake parameters</p>
+              <h3 style="font-size:20px; font-weight:800; color:var(--text-main); margin-bottom:6px;">AmneziaWG Obfuscation</h3>
+              <p style="font-size:13px; color:var(--text-dim); margin-bottom:24px;">Junk/Handshake parameters</p>
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; max-height:50vh; overflow-y:auto;">
                 <div v-for="key in ['jc','jmin','jmax','s1','s2','h1','h2','h3','h4','i1','i2','i3','i4','i5']" :key="key">
                   <div class="section-label" style="margin-bottom:5px;">{{key}}</div>
@@ -647,7 +688,7 @@
         <div v-if="nodeSettingsDialog" class="modal-backdrop" @click.self="nodeSettingsDialog = false">
           <div class="modal-box" style="max-width:420px;">
             <div style="padding:28px;">
-              <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:24px;">{{$t('nodeSettings')}}</h3>
+              <h3 style="font-size:20px; font-weight:800; color:var(--text-main); margin-bottom:24px;">{{$t('nodeSettings')}}</h3>
               <div style="display:flex; flex-direction:column; gap:14px;">
                 <div>
                   <div class="section-label" style="margin-bottom:6px;">{{$t('setupHost')}}</div>

@@ -109,6 +109,7 @@ new Vue({
     nodes: [],
     selectedNodeId: 'local',
     nodeAddDialog: false,
+    nodeDropdownOpen: false,
     newNode: { name: '', url: '', token: '' },
     nodeStatus: {},
 
@@ -120,12 +121,6 @@ new Vue({
       'gravatar': false,
     },
     enableOneTimeLinks: false,
-
-    nodes: [],
-    selectedNodeId: 'local',
-    nodeAddDialog: false,
-    newNode: { name: '', url: '', token: '' },
-    nodeStatus: {},
 
     enableSortClient: false,
     sortClient: true, // Sort clients by name, true = asc, false = desc
@@ -237,11 +232,23 @@ new Vue({
     },
     addNode() {
       if (!this.newNode.name || !this.newNode.url) return;
+
+      // Prevent adding a server whose URL resolves to this same hub
+      const normalizedNew = this.newNode.url.replace(/\/$/, '').toLowerCase();
+      const isDuplicate = this.nodes.some(n => {
+        if (n.url === 'local') return false;
+        return n.url.replace(/\/$/, '').toLowerCase() === normalizedNew;
+      });
+      if (isDuplicate) {
+        alert('⚠️ Этот сервер уже добавлен в список!');
+        return;
+      }
+
       this.api.addNode(this.newNode).then(() => {
         this.nodeAddDialog = false;
         this.newNode = { name: '', url: '', token: '' };
         this.loadNodes();
-      });
+      }).catch(err => alert('Ошибка добавления: ' + (err.message || err)));
     },
     deleteNode(id) {
       if (confirm('Delete this server?')) {
@@ -435,8 +442,9 @@ new Vue({
     },
     setTheme(theme) {
       const { classList } = document.documentElement;
-      const shouldAddDarkClass = theme === 'dark' || (theme === 'auto' && this.prefersDarkScheme.matches);
-      classList.toggle('dark', shouldAddDarkClass);
+      const shouldBeDark = theme === 'dark' || (theme === 'auto' && this.prefersDarkScheme.matches);
+      classList.toggle('dark', shouldBeDark);
+      classList.toggle('light', !shouldBeDark);
     },
     handlePrefersChange(e) {
       if (localStorage.theme === 'auto') {
@@ -635,6 +643,9 @@ new Vue({
     }).catch((err) => console.error(err));
   },
   computed: {
+    selectedNode() {
+      return this.nodes.find(n => n.id === this.selectedNodeId) || null;
+    },
     chartOptionsTX() {
       const opts = {
         ...this.chartOptions,

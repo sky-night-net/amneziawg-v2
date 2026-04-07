@@ -81,6 +81,49 @@ router.post('/api/agent/awg-settings', defineEventHandler(async (event) => {
   return await wireguard.updateAwgSettings(settings);
 }));
 
+router.post('/api/agent/clients/:clientId/enable', defineEventHandler(async (event) => {
+  const clientId = event.context.params.clientId;
+  return await wireguard.enableClient({ clientId });
+}));
+
+router.post('/api/agent/clients/:clientId/disable', defineEventHandler(async (event) => {
+  const clientId = event.context.params.clientId;
+  return await wireguard.disableClient({ clientId });
+}));
+
+router.post('/api/agent/clients/:clientId/generateOneTimeLink', defineEventHandler(async (event) => {
+  const clientId = event.context.params.clientId;
+  return await wireguard.generateOneTimeLink({ clientId });
+}));
+
+router.put('/api/agent/clients/:clientId/name', defineEventHandler(async (event) => {
+  const clientId = event.context.params.clientId;
+  const { name } = await readBody(event);
+  return await wireguard.updateClientName({ clientId, name });
+}));
+
+router.put('/api/agent/clients/:clientId/address', defineEventHandler(async (event) => {
+  const clientId = event.context.params.clientId;
+  const { address } = await readBody(event);
+  return await wireguard.updateClientAddress({ clientId, address });
+}));
+
+router.put('/api/agent/clients/:clientId/expireDate', defineEventHandler(async (event) => {
+  const clientId = event.context.params.clientId;
+  const { expireDate } = await readBody(event);
+  return await wireguard.updateClientExpireDate({ clientId, expireDate });
+}));
+
+router.get('/api/agent/clients/:clientId/configuration', defineEventHandler(async (event) => {
+  const clientId = event.context.params.clientId;
+  return await wireguard.getClientConfiguration(clientId);
+}));
+
+router.get('/api/agent/clients/:clientId/qrcode.svg', defineEventHandler(async (event) => {
+  const clientId = event.context.params.clientId;
+  return await wireguard.getClientQRCodeSVG({ clientId });
+}));
+
 app.use(router);
 
 module.exports = {
