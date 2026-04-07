@@ -327,7 +327,12 @@ module.exports = class Server {
     app.use(router2);
 
     const getTarget = async (event) => {
-      let nodeId = event.node.req.session.selectedNodeId || 'local';
+      // If request authenticated by Agent Token, force local execution
+      if (event.node.req.headers['authorization']?.startsWith('Bearer')) {
+        return { nodeId: 'local', isLocal: true };
+      }
+
+      let nodeId = event.node.req.session?.selectedNodeId || 'local';
       if (nodeId !== 'local') {
         try {
           const NodeManager = require('./NodeManager');
@@ -384,7 +389,7 @@ module.exports = class Server {
         }
         const NodeManager = require('./NodeManager');
         // Remote Agent QR code (SVG string)
-        return await (new NodeManager()).callAgent(nodeId, `/api/wireguard/client/${clientId}/qrcode.svg`);
+        return await (new NodeManager()).callAgent(nodeId, `/api/agent/clients/${clientId}/qrcode.svg`);
       }))
       .get('/api/wireguard/client/:clientId/configuration', defineEventHandler(async (event) => {
         const { nodeId, isLocal } = await getTarget(event);
@@ -402,7 +407,7 @@ module.exports = class Server {
           return config;
         }
         const NodeManager = require('./NodeManager');
-        const config = await (new NodeManager()).callAgent(nodeId, `/api/wireguard/client/${clientId}/configuration`);
+        const config = await (new NodeManager()).callAgent(nodeId, `/api/agent/clients/${clientId}/configuration`);
         setHeader(event, 'Content-Type', 'text/plain');
         return config;
       }))
@@ -629,7 +634,17 @@ module.exports = class Server {
         const { expireDate } = await readBody(event);
         return await WireGuard.updateClientExpireDate({ clientId, expireDate });
       }))
-      .post('/api/agent/awg-settings', defineEventHandler(async (event) => {
+      .get('/api/agent/clients/:clientId/qrcode.svg', defineEventHandler(async (event) => {
+      const clientId = getRouterParam(event, 'clientId');
+      const svg = await WireGuard.getClientQRCodeSVG({ clientId });
+      setHeader(event, 'Content-Type', 'image/svg+xml');
+      return svg;
+    }))
+    .get('/api/agent/clients/:clientId/configuration', defineEventHandler(async (event) => {
+      const clientId = getRouterParam(event, 'clientId');
+      return await WireGuard.getClientConfiguration({ clientId });
+    }))
+    .post('/api/agent/awg-settings', defineEventHandler(async (event) => {
         const settings = await readBody(event);
         return await WireGuard.updateAwgSettings(settings);
       }));
