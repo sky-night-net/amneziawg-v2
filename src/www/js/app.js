@@ -65,7 +65,7 @@ new Vue({
   },
   i18n,
   data: {
-    authenticated: null,
+    authenticated: false,
     authenticating: false,
     setupComplete: true,
     setupData: {
@@ -270,6 +270,7 @@ new Vue({
       if (!this.authenticated) return;
 
       const clients = await this.api.getClients();
+      if (!Array.isArray(clients)) return;
       this.clients = clients.map((client) => {
         if (client.name.includes('@') && client.name.includes('.') && this.avatarSettings.gravatar) {
           client.avatar = `https://gravatar.com/avatar/${sha256(client.name.toLowerCase().trim())}.jpg`;
@@ -581,7 +582,7 @@ new Vue({
     chartOptionsTX() {
       const opts = {
         ...this.chartOptions,
-        colors: [CHART_COLORS.tx[this.theme]],
+        colors: [CHART_COLORS.tx[this.theme] || CHART_COLORS.tx.dark],
       };
       opts.chart.type = UI_CHART_TYPES[this.uiChartType].type || false;
       opts.stroke.width = UI_CHART_TYPES[this.uiChartType].strokeWidth;
@@ -590,7 +591,7 @@ new Vue({
     chartOptionsRX() {
       const opts = {
         ...this.chartOptions,
-        colors: [CHART_COLORS.rx[this.theme]],
+        colors: [CHART_COLORS.rx[this.theme] || CHART_COLORS.rx.dark],
       };
       opts.chart.type = UI_CHART_TYPES[this.uiChartType].type || false;
       opts.stroke.width = UI_CHART_TYPES[this.uiChartType].strokeWidth;
