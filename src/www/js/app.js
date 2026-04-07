@@ -474,9 +474,6 @@ new Vue({
         this.setTheme(e.matches ? 'dark' : 'light');
       }
     },
-    toggleCharts() {
-      localStorage.setItem('uiShowCharts', this.uiShowCharts ? 1 : 0);
-    },
     openAwgSettings() {
       this.api.getAwgSettings().then((res) => {
         this.awgSettings = res;
@@ -520,6 +517,50 @@ new Vue({
       }).then(() => {
         this.nodeSettingsDialog = false;
         alert('Settings saved. If you changed the host or password, you might need to re-login.');
+      }).catch(err => alert(err.message || err.toString()));
+    },
+    loadNodes() {
+      this.api.getNodes().then(nodes => {
+        // Always include local node
+        const localNode = { id: 'local', name: 'Offices Hub', url: 'local' };
+        this.nodes = [localNode, ...nodes.filter(n => n.id !== 'local')];
+        
+        // Fetch status for all
+        this.nodes.forEach(n => {
+          this.api.getNodeStatus(n.id).then(status => {
+            this.$set(this.nodeStatus, n.id, status);
+          }).catch(() => {
+            this.$set(this.nodeStatus, n.id, { error: true });
+          });
+        });
+      }).catch(err => {
+        console.error('Failed to load nodes:', err);
+        this.nodes = [{ id: 'local', name: 'Offices Hub', url: 'local' }];
+      });
+    },
+    selectNode(id) {
+      this.api.selectNode(id).then(() => {
+        this.selectedNodeId = id;
+        this.refresh();
+      }).catch(err => alert(err.message || err.toString()));
+    },
+    addNode() {
+      if (!this.newNode.name || !this.newNode.url || !this.newNode.token) {
+        alert('All fields are required');
+        return;
+      }
+      this.api.addNode(this.newNode).then(() => {
+        this.newNode = { name: '', url: '', token: '' };
+        this.loadNodes();
+      }).catch(err => alert(err.message || err.toString()));
+    },
+    deleteNode(id) {
+      if (id === 'local') return;
+      this.api.deleteNode(id).then(() => {
+        if (this.selectedNodeId === id) {
+          this.selectNode('local');
+        }
+        this.loadNodes();
       }).catch(err => alert(err.message || err.toString()));
     },
   },
