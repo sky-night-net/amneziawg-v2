@@ -73,9 +73,11 @@ module.exports = class NodeManager {
     }
 
     try {
+      const fullUrl = `${node.url.replace(/\/$/, '')}${endpoint}`;
+      console.log(`[HUB] Forwarding ${method.toUpperCase()} request to node "${node.name}" (${nodeId}) at: ${fullUrl}`);
       const response = await axios({
         method,
-        url: `${node.url.replace(/\/$/, '')}${endpoint}`,
+        url: fullUrl,
         headers: {
           'Authorization': `Bearer ${node.token || HUB_TOKEN}`,
         },
