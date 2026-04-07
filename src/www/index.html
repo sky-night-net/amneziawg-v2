@@ -456,10 +456,19 @@
       <transition name="fade">
         <div v-if="setupComplete === true && authenticated === false"
              style="min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; position:relative; z-index:10;">
-          <div style="margin-bottom:48px; text-align:center;">
-            <img src="./img/logo.svg" width="64" style="margin-bottom:24px;" />
+          <div style="margin-bottom:48px; text-align:center; display:flex; flex-direction:column; align-items:center;">
+            <img src="./img/logo.svg" width="64" style="margin-bottom:24px;" v-cloak />
             <h1 style="font-size:40px; font-weight:800; background:var(--header-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-1.5px; margin:0;">AmneziaWG</h1>
-            <p style="font-size:15px; font-weight:500; color:var(--text-muted); margin-top:8px;">{{$t('appSubtitle') || 'Multi-Node VPN Hub'}}</p>
+            <div style="margin-top:10px; display:flex; flex-direction:column; align-items:center; gap:4px;">
+              <p style="font-size:15px; font-weight:600; color:var(--text-main); margin:0; opacity:0.8;">{{$t('appSubtitle')}}</p>
+              <a href="https://t.me/skynight_network" target="_blank" 
+                 style="font-size:13px; font-weight:500; color:var(--text-muted); text-decoration:none; transition:all 0.2s; display:flex; align-items:center; gap:6px;"
+                 onmouseover="this.style.color='#ef4444'; this.style.opacity='1'" 
+                 onmouseout="this.style.color='var(--text-muted)'; this.style.opacity='0.6'">
+                {{$t('appDesigner')}}
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="opacity:0.8;"><path d="M11.944 0C5.356 0 0 5.356 0 11.944c0 6.589 5.356 12 11.944 12 6.589 0 12-5.411 12-12C23.944 5.356 18.533 0 11.944 0zm5.667 8.222l-1.944 9.167c-.139.611-.5.75-.972.5l-2.944-2.167-1.417 1.361c-.167.167-.278.278-.583.278l.222-3 5.472-4.944c.222-.222-.056-.333-.333-.139L8.333 13.944l-2.889-.917c-.639-.194-.639-.639.111-.944l11.389-4.389c.528-.194.972.139.667.444z"/></svg>
+              </a>
+            </div>
           </div>
           <div class="modal-box" style="max-width:380px; padding:32px;">
             <form @submit.prevent="login">
