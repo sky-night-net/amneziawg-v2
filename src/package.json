@@ -15,6 +15,7 @@
   "author": "Emile Nijssen",
   "license": "CC BY-NC-SA 4.0",
   "dependencies": {
+    "axios": "^1.7.0",
     "basic-auth": "^2.0.1",
     "bcryptjs": "^2.4.3",
     "crc-32": "^1.2.2",

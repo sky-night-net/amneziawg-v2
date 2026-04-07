@@ -169,37 +169,41 @@ ${client.preSharedKey ? `PresharedKey = ${client.preSharedKey}\n` : ''
       endpoint: null,
     }));
 
-    // Loop WireGuard status
-    const dump = await Util.exec('wg show wg0 dump', {
-      log: false,
-    });
-    dump
-      .trim()
-      .split('\n')
-      .slice(1)
-      .forEach((line) => {
-        const [
-          publicKey,
-          preSharedKey, // eslint-disable-line no-unused-vars
-          endpoint, // eslint-disable-line no-unused-vars
-          allowedIps, // eslint-disable-line no-unused-vars
-          latestHandshakeAt,
-          transferRx,
-          transferTx,
-          persistentKeepalive,
-        ] = line.split('\t');
-
-        const client = clients.find((client) => client.publicKey === publicKey);
-        if (!client) return;
-
-        client.latestHandshakeAt = latestHandshakeAt === '0'
-          ? null
-          : new Date(Number(`${latestHandshakeAt}000`));
-        client.endpoint = endpoint === '(none)' ? null : endpoint;
-        client.transferRx = Number(transferRx);
-        client.transferTx = Number(transferTx);
-        client.persistentKeepalive = persistentKeepalive;
+    // Loop WireGuard status — gracefully skip if interface not ready
+    try {
+      const dump = await Util.exec('wg show wg0 dump', {
+        log: false,
       });
+      dump
+        .trim()
+        .split('\n')
+        .slice(1)
+        .forEach((line) => {
+          const [
+            publicKey,
+            preSharedKey, // eslint-disable-line no-unused-vars
+            endpoint, // eslint-disable-line no-unused-vars
+            allowedIps, // eslint-disable-line no-unused-vars
+            latestHandshakeAt,
+            transferRx,
+            transferTx,
+            persistentKeepalive,
+          ] = line.split('\t');
+
+          const client = clients.find((client) => client.publicKey === publicKey);
+          if (!client) return;
+
+          client.latestHandshakeAt = latestHandshakeAt === '0'
+            ? null
+            : new Date(Number(`${latestHandshakeAt}000`));
+          client.endpoint = endpoint === '(none)' ? null : endpoint;
+          client.transferRx = Number(transferRx);
+          client.transferTx = Number(transferTx);
+          client.persistentKeepalive = persistentKeepalive;
+        });
+    } catch (err) {
+      debug(`WireGuard interface not ready yet, skipping stats: ${err.message}`);
+    }
 
     return clients;
   }

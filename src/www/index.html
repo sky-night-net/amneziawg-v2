@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html class="dark">
 
 <head>
   <title>AmneziaWG Hub</title>
   <meta charset="utf-8"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="./css/app.css" rel="stylesheet">
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" href="./img/favicon.ico" sizes="any">
@@ -12,332 +15,640 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
+
 <style>
-  [v-cloak] {
-    display: none;
+  * { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+  [v-cloak] { display: none; }
+
+  body {
+    background: #0a0a0f;
+    min-height: 100vh;
   }
-  .line-chart .apexcharts-svg{
-    transform: translateY(3px);
+
+  /* Animated background */
+  .bg-mesh {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 40%, rgba(158, 0, 30, 0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 20%, rgba(120, 0, 200, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 100% 60% at 60% 80%, rgba(0, 60, 180, 0.06) 0%, transparent 50%);
+    pointer-events: none;
   }
+
+  /* Glass card */
+  .glass {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+  }
+
+  /* Input styling */
+  .input-dark {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #e8e8f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    width: 100%;
+    outline: none;
+    transition: all 0.2s;
+    font-size: 14px;
+  }
+  .input-dark:focus {
+    border-color: rgba(220, 38, 38, 0.6);
+    background: rgba(255,255,255,0.07);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+  }
+  .input-dark::placeholder { color: rgba(255,255,255,0.25); }
+
+  /* Button styles */
+  .btn-primary {
+    background: linear-gradient(135deg, #dc2626, #9b1c1c);
+    color: white;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 12px 24px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 30px rgba(220, 38, 38, 0.45);
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+  }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-ghost {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.7);
+    border-radius: 10px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .btn-ghost:hover {
+    background: rgba(255,255,255,0.09);
+    color: white;
+  }
+
+  /* Client card */
+  .client-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 16px 20px;
+    transition: all 0.25s;
+    margin-bottom: 8px;
+  }
+  .client-card:hover {
+    background: rgba(255,255,255,0.055);
+    border-color: rgba(220, 38, 38, 0.25);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  /* Status dot glow */
+  .dot-online {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px rgba(34,197,94,0.7), 0 0 16px rgba(34,197,94,0.3);
+    animation: pulse-green 2s infinite;
+  }
+  .dot-offline {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+  }
+  @keyframes pulse-green {
+    0%, 100% { box-shadow: 0 0 8px rgba(34,197,94,0.7), 0 0 16px rgba(34,197,94,0.3); }
+    50% { box-shadow: 0 0 12px rgba(34,197,94,0.9), 0 0 24px rgba(34,197,94,0.5); }
+  }
+
+  /* Avatar */
+  .avatar {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(220,38,38,0.3), rgba(120,0,200,0.2));
+    border: 1px solid rgba(220,38,38,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px; color: #fca5a5;
+    flex-shrink: 0;
+  }
+
+  /* Header */
+  .header-logo {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .header-logo img { width: 36px; }
+  .header-logo .brand {
+    font-size: 20px; font-weight: 800;
+    background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+
+  /* Tag badge */
+  .badge {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; padding: 3px 8px; border-radius: 6px;
+    background: rgba(220,38,38,0.15); color: #fca5a5;
+    border: 1px solid rgba(220,38,38,0.2);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+  /* Modal backdrop */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 60;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-box {
+    background: #111118;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    width: 100%; max-width: 480px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+    overflow: hidden;
+  }
+
+  /* Icon button */
+  .icon-btn {
+    width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.6);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+  .icon-btn.danger:hover { background: rgba(220,38,38,0.15); color: #fca5a5; border-color: rgba(220,38,38,0.3); }
+  .icon-btn.active { background: rgba(220,38,38,0.15); color: #fca5a5; border-color: rgba(220,38,38,0.3); }
+
+  /* Section header */
+  .section-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.2px; color: rgba(255,255,255,0.3);
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center; padding: 60px 20px;
+    color: rgba(255,255,255,0.3);
+  }
+  .empty-state p { font-size: 14px; margin-top: 12px; }
+
+  /* Node selector */
+  .node-select {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: rgba(255,255,255,0.8);
+    font-size: 13px; font-weight: 500;
+    padding: 6px 32px 6px 12px;
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+  }
+  .node-select:focus { border-color: rgba(220,38,38,0.5); }
+
+  /* Transition */
+  .fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
+  .fade-enter, .fade-leave-to { opacity: 0; }
+  .slide-enter-active, .slide-leave-active { transition: all 0.25s; }
+  .slide-enter { transform: translateY(10px); opacity: 0; }
+  .slide-leave-to { transform: translateY(-10px); opacity: 0; }
 </style>
 
-<body class="bg-gray-50 dark:bg-neutral-800 font-sans">
+<body style="background:#0a0a0f; color: #e8e8f0;">
+  <div class="bg-mesh"></div>
+
   <div id="app">
-    <div v-cloak class="container mx-auto max-w-3xl px-3 md:px-0 mt-4 xs:mt-6">
-      
-      <!-- Setup Wizard -->
-      <div v-if="setupComplete === false" class="fixed inset-0 z-50 bg-gray-100 dark:bg-neutral-900 flex items-center justify-center p-4 text-gray-900 dark:text-white">
-        <div class="bg-white dark:bg-neutral-800 rounded-2xl shadow-2xl p-8 max-w-md w-full border border-gray-100 dark:border-neutral-700">
-          <div class="text-center mb-8">
-            <img src="./img/logo.svg" width="80" class="mx-auto mb-4" />
-            <h2 class="text-3xl font-bold">{{$t('setupTitle')}}</h2>
-            <p class="text-gray-500 dark:text-neutral-400 mt-2">{{$t('setupSubtitle')}}</p>
-          </div>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium mb-1">{{$t('setupHost')}}</label>
-              <input v-model="setupData.host" type="text" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-neutral-600 dark:bg-neutral-700 outline-none focus:ring-2 focus:ring-red-500" placeholder="e.g. 1.2.3.4">
+    <div v-cloak style="position:relative; z-index:1; min-height:100vh;">
+
+      <!-- ══════════════════════════════════════════
+           SETUP WIZARD (First Run)
+      ══════════════════════════════════════════ -->
+      <transition name="fade">
+        <div v-if="setupComplete === false" class="modal-backdrop" style="z-index:100;">
+          <div class="modal-box" style="max-width: 420px;">
+            <div style="padding: 40px 36px;">
+              <div style="text-align:center; margin-bottom:32px;">
+                <img src="./img/logo.svg" width="60" style="margin: 0 auto 16px;" />
+                <h2 style="font-size:24px; font-weight:800; color:#fff; margin-bottom:8px;">{{$t('setupTitle')}}</h2>
+                <p style="font-size:14px; color:rgba(255,255,255,0.4); line-height:1.6;">{{$t('setupSubtitle')}}</p>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:14px;">
+                <div>
+                  <div class="section-label" style="margin-bottom:6px;">{{$t('setupHost')}}</div>
+                  <input v-model="setupData.host" type="text" class="input-dark" placeholder="e.g. 1.2.3.4">
+                </div>
+                <div>
+                  <div class="section-label" style="margin-bottom:6px;">{{$t('setupPort')}}</div>
+                  <input v-model="setupData.port" type="number" class="input-dark" placeholder="51820">
+                </div>
+                <div>
+                  <div class="section-label" style="margin-bottom:6px;">{{$t('setupPassword')}}</div>
+                  <input v-model="setupData.password" type="password" class="input-dark" placeholder="••••••••••">
+                </div>
+                <button @click="setupServer" class="btn-primary" style="width:100%; margin-top:8px; font-size:15px;">
+                  {{$t('setupCompleteBtn')}}
+                </button>
+              </div>
             </div>
-            <div>
-              <label class="block text-sm font-medium mb-1">{{$t('setupPort')}}</label>
-              <input v-model="setupData.port" type="number" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-neutral-600 dark:bg-neutral-700 outline-none focus:ring-2 focus:ring-red-500">
-            </div>
-            <div>
-              <label class="block text-sm font-medium mb-1">{{$t('setupPassword')}}</label>
-              <input v-model="setupData.password" type="password" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-neutral-600 dark:bg-neutral-700 outline-none focus:ring-2 focus:ring-red-500">
-            </div>
-            <button @click="setupServer" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl transition duration-300 shadow-lg mt-4">
-              {{$t('setupCompleteBtn')}}
-            </button>
           </div>
         </div>
-      </div>
+      </transition>
 
-      <div v-if="setupComplete === true && authenticated === true">
-        <!-- Header -->
-        <div class="flex flex-col-reverse xxs:flex-row flex-auto items-center items-end gap-3 mb-6">
-          <h1 class="text-4xl dark:text-neutral-200 font-medium flex-grow self-start">
-            <img src="./img/logo.svg" width="60" class="inline align-middle dark:bg mr-2" /><span class="align-middle text-gray-900 dark:text-white">AmneziaWG</span>
-          </h1>
-          <div class="flex items-center grow-0 gap-3 items-end self-end xxs:self-center">
-            
-            <!-- Multi-Node Selector -->
-            <div v-if="authenticated" class="flex items-center space-x-2 mr-4 border-r pr-4 dark:border-neutral-600">
-              <span class="text-[10px] text-gray-400 dark:text-neutral-500 uppercase font-bold tracking-wider">{{$t('servers')}}:</span>
-              <div class="relative inline-block">
-                <select v-model="selectedNodeId" @change="selectNode(selectedNodeId)" 
-                  class="bg-gray-100 dark:bg-neutral-700 text-gray-700 dark:text-neutral-200 text-sm rounded-lg p-1.5 pl-3 pr-8 outline-none appearance-none border border-transparent focus:border-red-500 transition-all cursor-pointer font-medium">
-                  <option v-for="node in nodes" :key="node.id" :value="node.id">
-                    {{ node.name }}
-                  </option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                  <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 7.343 8.172 5.929 9.586z"/></svg>
-                </div>
+      <!-- ══════════════════════════════════════════
+           LOGIN SCREEN
+      ══════════════════════════════════════════ -->
+      <transition name="fade">
+        <div v-if="setupComplete === true && authenticated === false"
+             style="min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px;">
+          <div style="margin-bottom:32px; text-align:center;">
+            <img src="./img/logo.svg" width="72" style="margin:0 auto 16px;" />
+            <h1 style="font-size:32px; font-weight:800; background:linear-gradient(135deg,#fff,rgba(255,255,255,0.5)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-1px;">AmneziaWG</h1>
+            <p style="font-size:13px; color:rgba(255,255,255,0.3); margin-top:6px;">Multi-Node VPN Hub</p>
+          </div>
+          <div class="modal-box" style="max-width:360px;">
+            <form @submit="login" style="padding:32px;">
+              <div style="margin-bottom:16px;">
+                <input type="password" v-model="password" :placeholder="$t('password')"
+                       autocomplete="current-password" class="input-dark"
+                       style="font-size:15px;">
               </div>
-              <button @click="nodeAddDialog = true" :title="$t('addNode')"
-                class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-neutral-700 dark:hover:bg-neutral-600 transition text-gray-600 dark:text-gray-300">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
+              <div v-if="rememberMeEnabled" style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+                <input type="checkbox" v-model="remember" id="rememberMe" style="accent-color:#dc2626;">
+                <label for="rememberMe" style="font-size:13px; color:rgba(255,255,255,0.5); cursor:pointer;">{{$t('rememberMe')}}</label>
+              </div>
+              <button type="submit" class="btn-primary" style="width:100%;"
+                      :disabled="authenticating || !password" :style="(authenticating || !password) ? 'opacity:0.5; cursor:not-allowed;' : ''">
+                <span v-if="authenticating">●●●</span>
+                <span v-else>{{$t('signIn')}}</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </transition>
+
+      <!-- ══════════════════════════════════════════
+           MAIN DASHBOARD
+      ══════════════════════════════════════════ -->
+      <div v-if="setupComplete === true && authenticated === true">
+
+        <!-- Header -->
+        <div style="padding: 20px 28px 0; max-width: 900px; margin: 0 auto;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.06);">
+
+            <!-- Brand -->
+            <div class="header-logo">
+              <img src="./img/logo.svg" />
+              <div>
+                <div class="brand">AmneziaWG</div>
+                <div class="section-label" style="margin-top:1px;">Multi-Node Hub</div>
+              </div>
+            </div>
+
+            <!-- Right controls -->
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+
+              <!-- Node Selector -->
+              <div v-if="authenticated" style="display:flex; align-items:center; gap:8px; padding-right:10px; border-right:1px solid rgba(255,255,255,0.08);">
+                <div class="section-label">{{$t('servers')}}:</div>
+                <div style="position:relative;">
+                  <select v-model="selectedNodeId" @change="selectNode(selectedNodeId)" class="node-select">
+                    <option v-for="node in nodes" :key="node.id" :value="node.id">{{ node.name }}</option>
+                  </select>
+                  <svg style="position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;width:12px;height:12px;color:rgba(255,255,255,0.4);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                </div>
+                <button @click="nodeAddDialog = true" class="icon-btn" :title="$t('addNode')">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                </button>
+              </div>
+
+              <!-- Chart toggle -->
+              <label v-if="uiChartType > 0" class="icon-btn" :title="$t('toggleCharts')" style="cursor:pointer;">
+                <input type="checkbox" class="sr-only" v-model="uiShowCharts" @change="toggleCharts">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;" :style="uiShowCharts ? 'color:#fca5a5' : ''"><path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 19.875v-6.75Z" /></svg>
+              </label>
+
+              <!-- Theme toggle -->
+              <button @click="toggleTheme" class="icon-btn" :title="$t('theme.' + uiTheme)">
+                <svg v-if="uiTheme === 'light'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" /></svg>
+                <svg v-else-if="uiTheme === 'dark'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" /></svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;"><path d="M12,2.2c-5.4,0-9.8,4.4-9.8,9.8s4.4,9.8,9.8,9.8s9.8-4.4,9.8-9.8S17.4,2.2,12,2.2z M3.8,12c0-4.5,3.7-8.2,8.2-8.2v16.5C7.5,20.2,3.8,16.5,3.8,12z"/></svg>
+              </button>
+
+              <!-- Logout -->
+              <button v-if="requiresPassword" @click="logout" class="btn-ghost" style="padding:7px 14px; font-size:12px;">
+                {{$t('logout')}} →
               </button>
             </div>
-
-            <!-- Theme switcher -->
-            <button @click="toggleTheme"
-              class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-neutral-700 dark:hover:bg-neutral-600 transition" :title="$t(`theme.${uiTheme}`)">
-              <svg v-if="uiTheme === 'light'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
-              </svg>
-              <svg v-else-if="uiTheme === 'dark'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-neutral-400">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
-              </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5 fill-gray-600 dark:fill-neutral-400">
-                <path d="M12,2.2c-5.4,0-9.8,4.4-9.8,9.8s4.4,9.8,9.8,9.8s9.8-4.4,9.8-9.8S17.4,2.2,12,2.2z M3.8,12c0-4.5,3.7-8.2,8.2-8.2v16.5C7.5,20.2,3.8,16.5,3.8,12z" />
-              </svg>
-            </button>
-
-            <!-- Show / hide charts -->
-            <label v-if="uiChartType > 0" class="inline-flex items-center justify-center cursor-pointer w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-neutral-700 dark:hover:bg-neutral-600 whitespace-nowrap transition group" :title="$t('toggleCharts')">
-              <input type="checkbox" value="" class="sr-only peer" v-model="uiShowCharts" @change="toggleCharts">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" fill="currentColor" class="w-5 h-5 peer fill-gray-400 peer-checked:fill-gray-600 dark:fill-neutral-600 peer-checked:dark:fill-neutral-400 group-hover:dark:fill-neutral-500 transition">
-                <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 19.875v-6.75Z" />
-              </svg>
-            </label>
-
-            <!-- Logout -->
-            <span v-if="requiresPassword" class="text-sm text-gray-400 dark:text-neutral-400 cursor-pointer hover:underline" @click="logout">
-              {{$t("logout")}}
-              <svg class="h-3 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </span>
           </div>
         </div>
 
-        <!-- Release notification -->
-        <div v-if="latestRelease" class="bg-red-800 dark:bg-red-100 p-4 text-white dark:text-red-600 text-sm font-small mb-10 rounded-md shadow-lg" :title="`v${currentRelease} → v${latestRelease.version}`">
-          <div class="container mx-auto flex flex-row flex-auto items-center">
-            <div class="flex-grow">
-              <p class="font-bold">{{$t("updateAvailable")}}</p>
-              <p>{{latestRelease.changelog}}</p>
+        <!-- Content -->
+        <div style="max-width:900px; margin:0 auto; padding:20px 28px 40px;">
+
+          <!-- Update notification -->
+          <div v-if="latestRelease" style="margin-bottom:20px; background:rgba(220,38,38,0.1); border:1px solid rgba(220,38,38,0.3); border-radius:14px; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div>
+              <div style="font-weight:700; font-size:13px; color:#fca5a5;">🔄 {{$t('updateAvailable')}}</div>
+              <div style="font-size:12px; color:rgba(255,255,255,0.5); margin-top:2px;">{{latestRelease.changelog}}</div>
             </div>
-            <a href="https://github.com/wg-easy/wg-easy#updating" target="_blank" class="p-3 rounded-md bg-white dark:bg-red-100 float-right font-sm font-semibold text-red-800 dark:text-red-600 flex-shrink-0 border-2 border-red-800 dark:border-red-600 hover:border-white dark:hover:border-red-600 hover:text-white dark:hover:text-red-100 hover:bg-red-800 dark:hover:bg-red-600 transition-all">
-              {{$t("update")}} →
+            <a href="https://github.com/wg-easy/wg-easy#updating" target="_blank" class="btn-primary" style="padding:8px 16px; font-size:12px; text-decoration:none; white-space:nowrap;">
+              {{$t('update')}}
             </a>
           </div>
-        </div>
 
-        <!-- Dashboard Content -->
-        <div class="shadow-md rounded-lg bg-white dark:bg-neutral-700 overflow-hidden text-gray-900 dark:text-white">
-          <div class="flex flex-row flex-auto items-center p-3 px-5 border-b-2 border-gray-100 dark:border-neutral-600 bg-gray-50 dark:bg-neutral-700">
-            <div class="flex-grow">
-              <p class="text-2xl font-medium">{{$t("clients")}}</p>
+          <!-- Client Panel -->
+          <div class="glass" style="border-radius:20px; overflow:hidden;">
+            <!-- Panel Header -->
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid rgba(255,255,255,0.06);">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-size:18px; font-weight:700; color:#fff;">{{$t('clients')}}</span>
+                <span class="badge" v-if="clients">{{clients.length}}</span>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <!-- AWG Settings -->
+                <button @click="openAwgSettings()" class="icon-btn" title="AmneziaWG Settings">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                </button>
+                <!-- Node Settings -->
+                <button @click="nodeSettingsDialog = true" class="icon-btn" :title="$t('nodeSettings')">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" /></svg>
+                </button>
+                <!-- Backup -->
+                <a href="./api/wireguard/backup" class="icon-btn" title="Backup">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                </a>
+                <!-- New Client -->
+                <button @click="clientCreate = true; clientCreateName = ''; clientExpiredDate = '';" class="btn-primary" style="padding:8px 18px; font-size:13px; display:flex; align-items:center; gap:6px;">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                  {{$t('new')}}
+                </button>
+              </div>
             </div>
-            <div class="flex gap-2">
-              
-              <!-- AWG Settings -->
-              <button @click="openAwgSettings()" class="hover:bg-red-800 hover:text-white text-gray-700 dark:text-neutral-200 border-2 border-gray-100 dark:border-neutral-600 py-1.5 px-3 rounded-lg inline-flex items-center transition text-sm font-medium">
-                <svg class="w-4 mr-2" inline xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                AWG
-              </button>
 
-              <!-- Node Host Settings -->
-              <button @click="nodeSettingsDialog = true" class="hover:bg-red-800 hover:text-white text-gray-700 dark:text-neutral-200 border-2 border-gray-100 dark:border-neutral-600 py-1.5 px-3 rounded-lg inline-flex items-center transition text-sm font-medium" :title="$t('nodeSettings')">
-                <svg class="w-4" inline xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                </svg>
-              </button>
-
-              <!-- New Client -->
-              <button @click="clientCreate = true; clientCreateName = ''; clientExpiredDate = '';" class="bg-red-800 hover:bg-red-700 text-white py-1.5 px-4 rounded-lg inline-flex items-center transition text-sm font-bold shadow-sm">
-                <svg class="w-4 mr-2" inline xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                {{$t("new")}}
-              </button>
-            </div>
-          </div>
-
-          <!-- Client List -->
-          <div>
-            <div v-if="clients && clients.length > 0" v-for="client in clients" :key="client.id" class="relative overflow-hidden border-b last:border-b-0 border-gray-100 dark:border-neutral-600">
-              <!-- Client item content (simplified for brevity here, should match original fully) -->
-              <div class="relative py-4 px-5 z-10 flex flex-col sm:flex-row justify-between items-center gap-4">
-                 <div class="flex items-center gap-4 flex-grow">
-                    <div class="h-10 w-10 rounded-full bg-red-100 dark:bg-neutral-600 flex items-center justify-center text-red-800 dark:text-red-400 font-bold">
-                       {{ client.name[0].toUpperCase() }}
-                    </div>
-                    <div>
-                       <div class="font-medium text-lg leading-tight">{{ client.name }}</div>
-                       <div class="text-xs text-gray-500">{{ client.address }}</div>
-                    </div>
-                 </div>
-                 <div class="flex items-center gap-3">
-                    <!-- Traffic Stats -->
-                    <div class="text-[10px] text-gray-400 uppercase font-mono text-right mr-4 leading-tight">
-                       <div>TX: {{ client.transferTxCurrent | bytes }}/s</div>
-                       <div>RX: {{ client.transferRxCurrent | bytes }}/s</div>
-                    </div>
-                    <!-- Actions -->
-                    <div class="flex gap-1">
-                      <button @click="qrcode = `./api/wireguard/client/${client.id}/qrcode.svg`" class="p-2 hover:bg-gray-100 dark:hover:bg-neutral-600 rounded-lg transition" title="QR Code">
-                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" /></svg>
-                      </button>
-                      <a :href="'./api/wireguard/client/' + client.id + '/configuration'" download class="p-2 hover:bg-gray-100 dark:hover:bg-neutral-600 rounded-lg transition" title="Download Config">
-                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                      </a>
-                      <div @click="client.enabled ? disableClient(client) : enableClient(client)" class="cursor-pointer p-2 rounded-lg transition" :class="client.enabled ? 'text-red-600 bg-red-50 dark:bg-red-900/20' : 'text-gray-400 bg-gray-50 dark:bg-neutral-600'">
-                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M5.636 18.364a9 9 0 0 0 12.728 0M12 3v9" /></svg>
+            <!-- Client list -->
+            <div style="padding: 12px;">
+              <transition-group name="slide" tag="div">
+                <div v-if="clients && clients.length > 0" v-for="client in clients" :key="client.id" class="client-card">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                    <!-- Left: avatar + info -->
+                    <div style="display:flex; align-items:center; gap:14px; flex:1; min-width:0;">
+                      <div class="avatar">
+                        <img v-if="client.avatar" :src="client.avatar" style="width:100%;height:100%;border-radius:12px;object-fit:cover;" />
+                        <span v-else>{{ client.name[0].toUpperCase() }}</span>
                       </div>
-                      <button @click="clientDelete = client" class="p-2 text-gray-400 hover:text-red-600 transition">
-                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+                      <div style="min-width:0;">
+                        <div style="font-weight:600; font-size:15px; color:#fff; display:flex; align-items:center; gap:8px;">
+                          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ client.name }}</span>
+                          <div :class="client.latestHandshakeAt ? 'dot-online' : 'dot-offline'" style="flex-shrink:0;"></div>
+                        </div>
+                        <div style="font-size:12px; color:rgba(255,255,255,0.35); margin-top:2px;">{{ client.address }}</div>
+                        <div v-if="client.latestHandshakeAt" style="font-size:11px; color:rgba(255,255,255,0.25);">{{ client.latestHandshakeAt | timeago }}</div>
+                      </div>
+                    </div>
+
+                    <!-- Right: stats + actions -->
+                    <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                      <!-- Traffic stats -->
+                      <div v-if="uiTrafficStats" style="font-family:monospace; font-size:10px; color:rgba(255,255,255,0.3); text-align:right; line-height:1.5; margin-right:8px;">
+                        <div>↑ {{ client.transferTxCurrent | bytes }}/s</div>
+                        <div>↓ {{ client.transferRxCurrent | bytes }}/s</div>
+                      </div>
+                      <!-- QR -->
+                      <button @click="qrcode = './api/wireguard/client/' + client.id + '/qrcode.svg'" class="icon-btn" :title="$t('showQR')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" /></svg>
+                      </button>
+                      <!-- Download config -->
+                      <a :href="'./api/wireguard/client/' + client.id + '/configuration'" download class="icon-btn" :title="$t('downloadConfig')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                      </a>
+                      <!-- Enable / Disable -->
+                      <button @click="client.enabled ? disableClient(client) : enableClient(client)"
+                              class="icon-btn" :class="client.enabled ? 'active' : ''"
+                              :title="client.enabled ? $t('disableClient') : $t('enableClient')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M5.636 18.364a9 9 0 0 0 12.728 0M12 3v9" /></svg>
+                      </button>
+                      <!-- Delete -->
+                      <button @click="clientDelete = client" class="icon-btn danger" :title="$t('deleteClient')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
                       </button>
                     </div>
-                 </div>
+                  </div>
+                </div>
+              </transition-group>
+
+              <!-- Empty state -->
+              <div v-if="clients !== null && clients.length === 0" class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" style="width:56px;height:56px;margin:0 auto;color:rgba(255,255,255,0.15);"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                <p>{{$t('noClients')}}</p>
+              </div>
+
+              <!-- Loading state -->
+              <div v-if="clients === null" class="empty-state">
+                <div style="font-size:24px; animation:spin 1s linear infinite; display:inline-block;">◌</div>
+                <p>Loading...</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Modals -->
+      <!-- ══════════════════════════════════════════
+           MODALS
+      ══════════════════════════════════════════ -->
 
-      <!-- Multi-Node Management Modal -->
-      <div v-if="nodeAddDialog" class="fixed z-[60] inset-0 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-          <div class="fixed inset-0 transition-opacity" @click="nodeAddDialog = false">
-            <div class="absolute inset-0 bg-gray-900 opacity-75 backdrop-blur-sm"></div>
+      <!-- Create Client Modal -->
+      <transition name="fade">
+        <div v-if="clientCreate" class="modal-backdrop" @click.self="clientCreate = false">
+          <div class="modal-box">
+            <div style="padding:28px 28px 0;">
+              <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:6px;">{{$t('newClient')}}</h3>
+              <p style="font-size:13px; color:rgba(255,255,255,0.35); margin-bottom:24px;">{{$t('name')}}</p>
+              <div style="margin-bottom:14px;">
+                <input type="text" v-model="clientCreateName" :placeholder="$t('name')"
+                       class="input-dark" @keyup.enter="createClient(); clientCreate = false;" autofocus>
+              </div>
+              <div v-if="enableExpireTime" style="margin-bottom:14px;">
+                <div class="section-label" style="margin-bottom:6px;">{{$t('ExpireDate')}}</div>
+                <input type="date" v-model="clientExpiredDate" class="input-dark">
+              </div>
+            </div>
+            <div style="display:flex; gap:10px; padding:20px 28px 28px;">
+              <button @click="createClient(); clientCreate = false;" class="btn-primary" style="flex:1;">
+                {{$t('create')}}
+              </button>
+              <button @click="clientCreate = false" class="btn-ghost">{{$t('cancel')}}</button>
+            </div>
           </div>
-          <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-          <div class="inline-block align-bottom bg-white dark:bg-neutral-800 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full border border-gray-100 dark:border-neutral-700">
-            <div class="px-6 pt-6 pb-4">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 mr-2 text-red-600">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 0 1-3-3m3 3a3 3 0 1 0 0 6h13.5a3 3 0 1 0 0-6m-16.5-3a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3m-19.5 0a4.5 4.5 0 0 1 .9-2.7L5.737 5.1a3.375 3.375 0 0 1 2.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 0 1 .9 2.7" />
-                 </svg>
-                 {{$t('servers')}}
-              </h3>
-              
-              <div class="space-y-2 mb-6 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                <div v-for="node in nodes" :key="node.id" class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-neutral-700/50 border border-transparent hover:border-red-500/30 transition-all">
-                  <div class="flex items-center gap-3">
-                    <div class="w-2 h-2 rounded-full" :class="nodeStatus[node.id] && !nodeStatus[node.id].error ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-red-500'"></div>
+        </div>
+      </transition>
+
+      <!-- Delete Client Modal -->
+      <transition name="fade">
+        <div v-if="clientDelete" class="modal-backdrop" @click.self="clientDelete = null">
+          <div class="modal-box" style="max-width:380px;">
+            <div style="padding:28px;">
+              <div style="width:48px;height:48px;background:rgba(220,38,38,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#fca5a5" style="width:24px;height:24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+              </div>
+              <h3 style="font-size:18px; font-weight:700; color:#fff; margin-bottom:8px;">{{$t('deleteClient')}}</h3>
+              <p style="font-size:13px; color:rgba(255,255,255,0.45); line-height:1.7; margin-bottom:24px;">
+                {{$t('deleteDialog1')}} <strong style="color:#fca5a5;">{{ clientDelete && clientDelete.name }}</strong>? {{$t('deleteDialog2')}}
+              </p>
+              <div style="display:flex; gap:10px;">
+                <button @click="deleteClient(clientDelete); clientDelete = null;" class="btn-primary" style="flex:1; background:linear-gradient(135deg,#dc2626,#7f1d1d);">
+                  {{$t('deleteClient')}}
+                </button>
+                <button @click="clientDelete = null" class="btn-ghost">{{$t('cancel')}}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <!-- QR Code Modal -->
+      <transition name="fade">
+        <div v-if="qrcode" class="modal-backdrop" @click="qrcode = null">
+          <div class="modal-box" style="max-width:340px; padding:28px; text-align:center;" @click.stop>
+            <p style="font-size:13px; font-weight:600; color:rgba(255,255,255,0.5); margin-bottom:20px; text-transform:uppercase; letter-spacing:1px;">{{$t('showQR')}}</p>
+            <div style="background:white; border-radius:16px; padding:20px; margin-bottom:20px;">
+              <img :src="qrcode" style="width:100%; display:block;">
+            </div>
+            <button @click="qrcode = null" class="btn-ghost" style="width:100%;">{{$t('cancel')}}</button>
+          </div>
+        </div>
+      </transition>
+
+      <!-- Node Add Modal -->
+      <transition name="fade">
+        <div v-if="nodeAddDialog" class="modal-backdrop" @click.self="nodeAddDialog = false">
+          <div class="modal-box" style="max-width:500px;">
+            <div style="padding:28px 28px 20px;">
+              <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:6px;">{{$t('servers')}}</h3>
+              <p style="font-size:13px; color:rgba(255,255,255,0.35); margin-bottom:20px;">Management Port 161 (TCP)</p>
+
+              <!-- Node list -->
+              <div style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; margin-bottom:20px;">
+                <div v-for="node in nodes" :key="node.id"
+                     style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;">
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <div :class="nodeStatus[node.id] && !nodeStatus[node.id].error ? 'dot-online' : 'dot-offline'"></div>
                     <div>
-                      <div class="text-sm font-bold">{{ node.name }}</div>
-                      <div class="text-[10px] text-gray-400">{{ node.url === 'local' ? $t('localNode') : node.url }}</div>
+                      <div style="font-size:13px; font-weight:600; color:#fff;">{{ node.name }}</div>
+                      <div style="font-size:11px; color:rgba(255,255,255,0.3);">{{ node.url === 'local' ? $t('localNode') : node.url }}</div>
                     </div>
                   </div>
-                  <div class="flex items-center gap-3">
-                     <span v-if="nodeStatus[node.id] && !nodeStatus[node.id].error" class="text-[10px] font-mono text-gray-400 bg-white dark:bg-neutral-800 px-2 py-0.5 rounded border dark:border-neutral-600">
-                        L: {{ nodeStatus[node.id].os.load[0] }}
-                     </span>
-                     <button v-if="node.id !== 'local'" @click="deleteNode(node.id)" class="text-gray-400 hover:text-red-600 p-1 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
-                     </button>
-                  </div>
+                  <button v-if="node.id !== 'local'" @click="deleteNode(node.id)" class="icon-btn danger" style="width:28px;height:28px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+                  </button>
                 </div>
               </div>
 
-              <div class="bg-gray-50 dark:bg-neutral-900/50 p-4 rounded-2xl border dark:border-neutral-700">
-                 <div class="text-[10px] uppercase font-bold text-gray-400 mb-2">{{$t('addNode')}} (SNMP Port 161)</div>
-                 <div class="space-y-3">
-                    <input type="text" v-model="newNode.name" :placeholder="$t('name')" class="w-full px-4 py-2 rounded-xl border dark:bg-neutral-800 dark:border-neutral-600 outline-none focus:ring-2 focus:ring-red-500 text-sm">
-                    <input type="text" v-model="newNode.url" :placeholder="$t('nodeUrl')" class="w-full px-4 py-2 rounded-xl border dark:bg-neutral-800 dark:border-neutral-600 outline-none focus:ring-2 focus:ring-red-500 text-sm">
-                    <div class="flex gap-2">
-                       <input type="password" v-model="newNode.token" :placeholder="$t('nodeToken')" class="flex-grow px-4 py-2 rounded-xl border dark:bg-neutral-800 dark:border-neutral-600 outline-none focus:ring-2 focus:ring-red-500 text-sm">
-                       <button @click="addNode" class="bg-red-600 text-white px-5 rounded-xl font-bold text-lg hover:bg-red-700 transition">+</button>
-                    </div>
-                 </div>
+              <!-- Add new node -->
+              <div style="padding:18px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:14px;">
+                <div class="section-label" style="margin-bottom:12px;">{{$t('addNode')}}</div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                  <input type="text" v-model="newNode.name" :placeholder="$t('name')" class="input-dark">
+                  <input type="text" v-model="newNode.url" :placeholder="$t('nodeUrl')" class="input-dark">
+                  <div style="display:flex; gap:8px;">
+                    <input type="password" v-model="newNode.token" :placeholder="$t('nodeToken')" class="input-dark" style="flex:1;">
+                    <button @click="addNode" class="btn-primary" style="padding:10px 20px; flex-shrink:0;">+</button>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="bg-gray-50 dark:bg-neutral-700/50 px-6 py-4 flex justify-end gap-3">
-               <button @click="nodeAddDialog = false" class="px-6 py-2 rounded-xl text-sm font-bold text-gray-500 hover:text-gray-700 dark:text-neutral-400 dark:hover:text-white transition">{{$t('cancel')}}</button>
+            <div style="padding:16px 28px 24px; display:flex; justify-content:flex-end;">
+              <button @click="nodeAddDialog = false" class="btn-ghost">{{$t('cancel')}}</button>
             </div>
           </div>
         </div>
-      </div>
+      </transition>
 
       <!-- AWG Settings Modal -->
-      <div v-if="awgSettingsDialog" class="fixed z-[60] inset-0 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-          <div class="fixed inset-0 transition-opacity" @click="awgSettingsDialog = false"><div class="absolute inset-0 bg-gray-900 opacity-75 backdrop-blur-sm"></div></div>
-          <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-          <div class="inline-block align-bottom bg-white dark:bg-neutral-800 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md w-full border dark:border-neutral-700">
-            <div class="p-8">
-              <h3 class="text-2xl font-bold mb-6">AmneziaWG Obfuscation</h3>
-              <div class="grid grid-cols-2 gap-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
-                 <div v-for="key in ['jc','jmin','jmax','s1','s2','h1','h2','h3','h4','i1','i2','i3','i4','i5']" :key="key">
-                    <label class="block text-[10px] uppercase font-bold text-gray-400 mb-1">{{key}}</label>
-                    <input v-model="awgSettings[key]" type="text" class="w-full px-3 py-2 rounded-lg border dark:bg-neutral-700 dark:border-neutral-600 outline-none focus:ring-2 focus:ring-red-500 text-sm">
-                 </div>
+      <transition name="fade">
+        <div v-if="awgSettingsDialog" class="modal-backdrop" @click.self="awgSettingsDialog = false">
+          <div class="modal-box" style="max-width:480px;">
+            <div style="padding:28px;">
+              <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:6px;">AmneziaWG Obfuscation</h3>
+              <p style="font-size:13px; color:rgba(255,255,255,0.35); margin-bottom:24px;">Junk/Handshake parameters</p>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; max-height:50vh; overflow-y:auto;">
+                <div v-for="key in ['jc','jmin','jmax','s1','s2','h1','h2','h3','h4','i1','i2','i3','i4','i5']" :key="key">
+                  <div class="section-label" style="margin-bottom:5px;">{{key}}</div>
+                  <input v-model="awgSettings[key]" type="text" class="input-dark" style="padding:9px 12px; font-size:13px;">
+                </div>
               </div>
-              <div class="mt-8 flex gap-3">
-                 <button @click="saveAwgSettings" class="flex-grow bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 shadow-lg transition duration-300">Save</button>
-                 <button @click="awgSettingsDialog = false" class="px-6 py-3 rounded-xl border dark:border-neutral-600 hover:bg-gray-100 dark:hover:bg-neutral-700 transition">Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Node Host Settings Modal (Local) -->
-      <div v-if="nodeSettingsDialog" class="fixed z-[60] inset-0 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-          <div class="fixed inset-0 transition-opacity" @click="nodeSettingsDialog = false"><div class="absolute inset-0 bg-gray-900 opacity-75 backdrop-blur-sm"></div></div>
-          <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-          <div class="inline-block align-bottom bg-white dark:bg-neutral-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md w-full border dark:border-neutral-700">
-            <div class="p-8 text-gray-900 dark:text-white">
-              <h3 class="text-2xl font-bold mb-6">{{$t('nodeSettings')}}</h3>
-              <div class="space-y-4">
-                 <div>
-                    <label class="block text-sm font-bold text-gray-400 mb-1 uppercase">{{$t('setupHost')}}</label>
-                    <input v-model="nodeSettings.host" type="text" class="w-full px-4 py-3 rounded-xl border dark:bg-neutral-700 dark:border-neutral-600 outline-none focus:ring-2 focus:ring-red-500 shadow-inner">
-                 </div>
-                 <div>
-                    <label class="block text-sm font-bold text-gray-400 mb-1 uppercase">{{$t('setupPassword')}}</label>
-                    <input v-model="nodeSettings.password" type="password" class="w-full px-4 py-3 rounded-xl border dark:bg-neutral-700 dark:border-neutral-600 outline-none focus:ring-2 focus:ring-red-500 shadow-inner">
-                 </div>
-              </div>
-              <div class="mt-8 flex gap-3">
-                 <button @click="saveNodeSettings" class="flex-grow bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 shadow-lg transition duration-300">{{$t('saveSettings')}}</button>
-                 <button @click="nodeSettingsDialog = false" class="px-6 py-3 rounded-xl border dark:border-neutral-600 hover:bg-gray-100 dark:hover:bg-neutral-700 transition">{{$t('cancel')}}</button>
+              <div style="display:flex; gap:10px; margin-top:24px;">
+                <button @click="saveAwgSettings" class="btn-primary" style="flex:1;">{{$t('saveSettings')}}</button>
+                <button @click="awgSettingsDialog = false" class="btn-ghost">{{$t('cancel')}}</button>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </transition>
 
-    </div> <!-- End max-width container -->
-
-    <!-- Login Screen -->
-    <div v-if="setupComplete === true && authenticated === false" class="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50 dark:bg-neutral-900">
-      <div class="text-center mb-10">
-        <img src="./img/logo.svg" width="100" class="mx-auto mb-4" />
-        <h1 class="text-4xl font-bold text-gray-900 dark:text-white">AmneziaWG</h1>
-      </div>
-      <form @submit="login" class="bg-white dark:bg-neutral-800 rounded-3xl shadow-2xl p-8 w-full max-w-sm border dark:border-neutral-700">
-        <div class="mb-6 relative">
-          <input type="password" v-model="password" :placeholder="$t('password')" autocomplete="current-password" class="w-full px-5 py-4 rounded-2xl border dark:bg-neutral-700 dark:border-neutral-600 dark:text-white outline-none focus:ring-2 focus:ring-red-500 transition-all font-medium">
+      <!-- Node Settings Modal -->
+      <transition name="fade">
+        <div v-if="nodeSettingsDialog" class="modal-backdrop" @click.self="nodeSettingsDialog = false">
+          <div class="modal-box" style="max-width:420px;">
+            <div style="padding:28px;">
+              <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:24px;">{{$t('nodeSettings')}}</h3>
+              <div style="display:flex; flex-direction:column; gap:14px;">
+                <div>
+                  <div class="section-label" style="margin-bottom:6px;">{{$t('setupHost')}}</div>
+                  <input v-model="nodeSettings.host" type="text" class="input-dark">
+                </div>
+                <div>
+                  <div class="section-label" style="margin-bottom:6px;">{{$t('setupPort')}}</div>
+                  <input v-model="nodeSettings.port" type="number" class="input-dark">
+                </div>
+                <div>
+                  <div class="section-label" style="margin-bottom:6px;">{{$t('setupPassword')}} ({{$t('setupSubtitle_optional') || 'leave blank to keep current'}})</div>
+                  <input v-model="nodeSettings.password" type="password" class="input-dark">
+                </div>
+              </div>
+              <div style="display:flex; gap:10px; margin-top:24px;">
+                <button @click="saveNodeSettings" class="btn-primary" style="flex:1;">{{$t('saveSettings')}}</button>
+                <button @click="nodeSettingsDialog = false" class="btn-ghost">{{$t('cancel')}}</button>
+              </div>
+            </div>
+          </div>
         </div>
-        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-2xl shadow-lg transition duration-300 disabled:opacity-50" :disabled="authenticating || !password">
-           <span v-if="authenticating" class="animate-pulse">Signing in...</span>
-           <span v-else>{{$t('signIn')}}</span>
-        </button>
-      </form>
-    </div>
+      </transition>
 
-    <!-- QR Code Popup -->
-    <div v-if="qrcode" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-8" @click="qrcode = null">
-      <div class="bg-white rounded-3xl p-10 max-w-full" @click.stop>
-        <img :src="qrcode" class="mx-auto" />
-      </div>
     </div>
+  </div>
 
-  </div> <!-- End #app -->
+  <style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0; }
+  </style>
 
   <script src="./js/vendor/vue.min.js"></script>
   <script src="./js/vendor/vue-i18n.min.js"></script>
