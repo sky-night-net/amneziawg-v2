@@ -387,61 +387,74 @@ module.exports = class Server {
         return await (new NodeManager()).callAgent(nodeId, `/api/agent/clients/${clientId}`, 'delete');
       }))
       .post('/api/wireguard/client/:clientId/enable', defineEventHandler(async (event) => {
+        const { nodeId, isLocal } = await getTarget(event);
         const clientId = getRouterParam(event, 'clientId');
-        if (clientId === '__proto__' || clientId === 'constructor' || clientId === 'prototype') {
-          throw createError({ status: 403 });
+        if (clientId === '__proto__' || clientId === 'constructor' || clientId === 'prototype') throw createError({ status: 403 });
+        if (isLocal) {
+          await WireGuard.enableClient({ clientId });
+          return { success: true };
         }
-        await WireGuard.enableClient({ clientId });
-        return { success: true };
+        const NodeManager = require('./NodeManager');
+        return await (new NodeManager()).callAgent(nodeId, `/api/agent/clients/${clientId}/enable`, 'post');
       }))
       .post('/api/wireguard/client/:clientId/generateOneTimeLink', defineEventHandler(async (event) => {
-        if (WG_ENABLE_ONE_TIME_LINKS === 'false') {
-          throw createError({
-            status: 404,
-            message: 'Invalid state',
-          });
-        }
+        const { nodeId, isLocal } = await getTarget(event);
+        if (WG_ENABLE_ONE_TIME_LINKS === 'false') throw createError({ status: 404 });
         const clientId = getRouterParam(event, 'clientId');
-        if (clientId === '__proto__' || clientId === 'constructor' || clientId === 'prototype') {
-          throw createError({ status: 403 });
+        if (clientId === '__proto__' || clientId === 'constructor' || clientId === 'prototype') throw createError({ status: 403 });
+        if (isLocal) {
+          await WireGuard.generateOneTimeLink({ clientId });
+          return { success: true };
         }
-        await WireGuard.generateOneTimeLink({ clientId });
-        return { success: true };
+        const NodeManager = require('./NodeManager');
+        return await (new NodeManager()).callAgent(nodeId, `/api/agent/clients/${clientId}/generateOneTimeLink`, 'post');
       }))
       .post('/api/wireguard/client/:clientId/disable', defineEventHandler(async (event) => {
+        const { nodeId, isLocal } = await getTarget(event);
         const clientId = getRouterParam(event, 'clientId');
-        if (clientId === '__proto__' || clientId === 'constructor' || clientId === 'prototype') {
-          throw createError({ status: 403 });
+        if (clientId === '__proto__' || clientId === 'constructor' || clientId === 'prototype') throw createError({ status: 403 });
+        if (isLocal) {
+          await WireGuard.disableClient({ clientId });
+          return { success: true };
         }
-        await WireGuard.disableClient({ clientId });
-        return { success: true };
+        const NodeManager = require('./NodeManager');
+        return await (new NodeManager()).callAgent(nodeId, `/api/agent/clients/${clientId}/disable`, 'post');
       }))
       .put('/api/wireguard/client/:clientId/name', defineEventHandler(async (event) => {
+        const { nodeId, isLocal } = await getTarget(event);
         const clientId = getRouterParam(event, 'clientId');
-        if (clientId === '__proto__' || clientId === 'constructor' || clientId === 'prototype') {
-          throw createError({ status: 403 });
-        }
+        if (clientId === '__proto__' || clientId === 'constructor' || clientId === 'prototype') throw createError({ status: 403 });
         const { name } = await readBody(event);
-        await WireGuard.updateClientName({ clientId, name });
-        return { success: true };
+        if (isLocal) {
+          await WireGuard.updateClientName({ clientId, name });
+          return { success: true };
+        }
+        const NodeManager = require('./NodeManager');
+        return await (new NodeManager()).callAgent(nodeId, `/api/agent/clients/${clientId}/name`, 'put', { name });
       }))
       .put('/api/wireguard/client/:clientId/address', defineEventHandler(async (event) => {
+        const { nodeId, isLocal } = await getTarget(event);
         const clientId = getRouterParam(event, 'clientId');
-        if (clientId === '__proto__' || clientId === 'constructor' || clientId === 'prototype') {
-          throw createError({ status: 403 });
-        }
+        if (clientId === '__proto__' || clientId === 'constructor' || clientId === 'prototype') throw createError({ status: 403 });
         const { address } = await readBody(event);
-        await WireGuard.updateClientAddress({ clientId, address });
-        return { success: true };
+        if (isLocal) {
+          await WireGuard.updateClientAddress({ clientId, address });
+          return { success: true };
+        }
+        const NodeManager = require('./NodeManager');
+        return await (new NodeManager()).callAgent(nodeId, `/api/agent/clients/${clientId}/address`, 'put', { address });
       }))
       .put('/api/wireguard/client/:clientId/expireDate', defineEventHandler(async (event) => {
+        const { nodeId, isLocal } = await getTarget(event);
         const clientId = getRouterParam(event, 'clientId');
-        if (clientId === '__proto__' || clientId === 'constructor' || clientId === 'prototype') {
-          throw createError({ status: 403 });
-        }
+        if (clientId === '__proto__' || clientId === 'constructor' || clientId === 'prototype') throw createError({ status: 403 });
         const { expireDate } = await readBody(event);
-        await WireGuard.updateClientExpireDate({ clientId, expireDate });
-        return { success: true };
+        if (isLocal) {
+          await WireGuard.updateClientExpireDate({ clientId, expireDate });
+          return { success: true };
+        }
+        const NodeManager = require('./NodeManager');
+        return await (new NodeManager()).callAgent(nodeId, `/api/agent/clients/${clientId}/expireDate`, 'put', { expireDate });
       }));
 
     const safePathJoin = (base, target) => {
