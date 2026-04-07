@@ -410,6 +410,16 @@ module.exports = class Server {
         }
         const NodeManager = require('./NodeManager');
         const config = await (new NodeManager()).callAgent(nodeId, `/api/agent/clients/${clientId}/config`);
+        
+        // Fetch client info from agent to get the name for the filename
+        const client = await (new NodeManager()).callAgent(nodeId, `/api/agent/clients/${clientId}`);
+        const configName = client.name
+          .replace(/[^a-zA-Z0-9_=+.-]/g, '-')
+          .replace(/(-{2,}|-$)/g, '-')
+          .replace(/-$/, '')
+          .substring(0, 32);
+
+        setHeader(event, 'Content-Disposition', `attachment; filename="${configName || clientId}.conf"`);
         setHeader(event, 'Content-Type', 'text/plain');
         return config;
       }))
