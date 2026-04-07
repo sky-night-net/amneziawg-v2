@@ -26,12 +26,21 @@ module.exports = class NodeManager {
       this.nodes = JSON.parse(data);
     } catch (err) {
       this.nodes = [this.localNode];
-      await this.saveNodes();
+      try {
+        await this.saveNodes();
+      } catch (saveErr) {
+        debug(`Could not save nodes.json, WG_PATH might not exist yet: ${saveErr.message}`);
+      }
     }
     return this.nodes;
   }
 
   async saveNodes() {
+    try {
+      await fs.mkdir(WG_PATH, { recursive: true });
+    } catch (e) {
+      // Ignore directory exists error
+    }
     await fs.writeFile(NODES_FILE, JSON.stringify(this.nodes, null, 2));
   }
 
