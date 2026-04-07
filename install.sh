@@ -45,14 +45,17 @@ else
     echo -e "${GREEN}Docker уже установлен.${NC}"
 fi
 
-# 4. Подготовка системы (Ядро)
+# Подготовка системы (Ядро и Маршрутизация)
 echo -e "\n${BLUE}[3/5] Подготовка ядра системы...${NC}"
 modprobe wireguard || echo -e "${RED}Предупреждение: Не удалось загрузить модуль wireguard. Убедитесь, что он установлен на хосте.${NC}"
 modprobe tun || echo -e "${RED}Предупреждение: Не удалось загрузить модуль tun.${NC}"
 
-# Авто-определение сетевого интерфейса
-ETH_DEV=$(ip route get 8.8.8.8 | awk '{print $5; exit}')
-echo -e "${GREEN}Определен сетевой интерфейс: ${ETH_DEV}${NC}"
+# Включение форвардинга пакетов (критично для доступа в интернет)
+sysctl -w net.ipv4.ip_forward=1 > /dev/null
+sysctl -w net.ipv4.conf.all.src_valid_mark=1 > /dev/null
+echo "net.ipv4.ip_forward=1" > /etc/sysctl.d/99-amnezia-forwarding.conf
+echo "net.ipv4.conf.all.src_valid_mark=1" >> /etc/sysctl.d/99-amnezia-forwarding.conf
+sysctl -p /etc/sysctl.d/99-amnezia-forwarding.conf > /dev/null
 
 # 5. Выбор портов (Интерактивный режим)
 echo -e "\n${BLUE}[4/5] Настройка сетевых портов...${NC}"
@@ -82,7 +85,7 @@ if [ "$(docker ps -aq -f name=amnezia-node)" ]; then
     docker rm amnezia-node
 fi
 
-# Запуск новой версии
+# Запуск новой версии (Контейнер использует eth0 для интернета внутри bridge сети)
 docker run -d \
   --name amnezia-node \
   --restart unless-stopped \
@@ -91,7 +94,7 @@ docker run -d \
   -v /etc/timezone:/etc/timezone:ro \
   -e WG_PORT=$WG_PORT_VAL \
   -e AGENT_PORT=$AGNT_PORT \
-  -e WG_DEVICE=$ETH_DEV \
+  -e WG_DEVICE=eth0 \
   -p $WG_PORT_VAL:$WG_PORT_VAL/udp \
   -p $GUI_PORT:51821/tcp \
   -p $AGNT_PORT:$AGNT_PORT/tcp \
