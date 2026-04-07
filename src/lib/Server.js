@@ -295,6 +295,13 @@ module.exports = class Server {
           return next();
         }
 
+        // Hub Bearer Token Authentication
+        const { AGENT_TOKEN } = require('../config');
+        const authHeader = req.headers['authorization'];
+        if (authHeader && AGENT_TOKEN && authHeader === `Bearer ${AGENT_TOKEN}`) {
+          return next();
+        }
+
         if (req.session && req.session.authenticated) {
           return next();
         }
@@ -569,6 +576,62 @@ module.exports = class Server {
         const { file } = await readBody(event);
         await WireGuard.restoreConfiguration(file);
         return { success: true };
+      }))
+      
+      // Agent API Endpoints
+      .get('/api/agent/status', defineEventHandler(async () => {
+        const os = require('os');
+        const clients = await WireGuard.getClients();
+        return {
+          os: { uptime: os.uptime(), load: os.loadavg(), totalmem: os.totalmem(), freemem: os.freemem() },
+          wireguard: { clientCount: clients.length, activeClients: clients.filter(c => c.latestHandshakeAt).length }
+        };
+      }))
+      .get('/api/agent/clients', defineEventHandler(async () => {
+        return await WireGuard.getClients();
+      }))
+      .get('/api/agent/config', defineEventHandler(async () => {
+        const config = await WireGuard.getConfig();
+        return config;
+      }))
+      .post('/api/agent/clients', defineEventHandler(async (event) => {
+        const { name, expiredDate } = await readBody(event);
+        return await WireGuard.createClient({ name, expiredDate });
+      }))
+      .delete('/api/agent/clients/:clientId', defineEventHandler(async (event) => {
+        const clientId = getRouterParam(event, 'clientId');
+        return await WireGuard.deleteClient({ clientId });
+      }))
+      .post('/api/agent/clients/:clientId/enable', defineEventHandler(async (event) => {
+        const clientId = getRouterParam(event, 'clientId');
+        return await WireGuard.enableClient({ clientId });
+      }))
+      .post('/api/agent/clients/:clientId/disable', defineEventHandler(async (event) => {
+        const clientId = getRouterParam(event, 'clientId');
+        return await WireGuard.disableClient({ clientId });
+      }))
+      .post('/api/agent/clients/:clientId/generateOneTimeLink', defineEventHandler(async (event) => {
+        const clientId = getRouterParam(event, 'clientId');
+        return await WireGuard.showOneTimeLink({ clientId });
+      }))
+      .put('/api/agent/clients/:clientId/name', defineEventHandler(async (event) => {
+        const clientId = getRouterParam(event, 'clientId');
+        const { name } = await readBody(event);
+        return await WireGuard.updateClientName({ clientId, name });
+      }))
+      .put('/api/agent/clients/:clientId/address', defineEventHandler(async (event) => {
+        const clientId = getRouterParam(event, 'clientId');
+        const { address } = await readBody(event);
+        return await WireGuard.updateClientAddress({ clientId, address });
+      }))
+      .put('/api/agent/clients/:clientId/expireDate', defineEventHandler(async (event) => {
+        const clientId = getRouterParam(event, 'clientId');
+        const { expireDate } = await readBody(event);
+        return await WireGuard.updateClientExpireDate({ clientId, expireDate });
+      }))
+      .post('/api/agent/awg-settings', defineEventHandler(async (event) => {
+        const settings = await readBody(event);
+        return await WireGuard.updateAwgSettings(settings);
       }));
 
     // Static assets
