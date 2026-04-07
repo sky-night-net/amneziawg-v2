@@ -386,6 +386,16 @@ module.exports = class Server {
         const NodeManager = require('./NodeManager');
         return await (new NodeManager()).callAgent(nodeId, `/api/agent/clients/${clientId}`, 'delete');
       }))
+      .post('/api/wireguard/client', defineEventHandler(async (event) => {
+        const { nodeId, isLocal } = await getTarget(event);
+        const { name, expiredDate } = await readBody(event);
+        if (isLocal) {
+          await WireGuard.createClient({ name, expiredDate });
+          return { success: true };
+        }
+        const NodeManager = require('./NodeManager');
+        return await (new NodeManager()).callAgent(nodeId, `/api/agent/clients`, 'post', { name, expiredDate });
+      }))
       .post('/api/wireguard/client/:clientId/enable', defineEventHandler(async (event) => {
         const { nodeId, isLocal } = await getTarget(event);
         const clientId = getRouterParam(event, 'clientId');
