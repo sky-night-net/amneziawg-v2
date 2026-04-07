@@ -349,14 +349,13 @@ new Vue({
           const session = await this.api.getSession();
           this.authenticated = session.authenticated;
           this.requiresPassword = session.requiresPassword;
-          return this.refresh();
-        })
-        .catch((err) => {
-          alert(err.message || err.toString());
-        })
-        .finally(() => {
           this.authenticating = false;
           this.password = null;
+          this.refresh().catch(console.error);
+        })
+        .catch((err) => {
+          this.authenticating = false;
+          alert(err.message || err.toString());
         });
     },
     logout(e) {
