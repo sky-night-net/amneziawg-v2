@@ -669,6 +669,12 @@ module.exports = class Server {
     createServer(toNodeListener(app)).listen(PORT, WEBUI_HOST);
     debug(`Listening on http://${WEBUI_HOST}:${PORT}`);
 
+    const { AGENT_PORT } = require('../config');
+    if (AGENT_PORT && AGENT_PORT !== PORT) {
+      createServer(toNodeListener(app)).listen(AGENT_PORT, WEBUI_HOST);
+      debug(`Agent Management listening on http://${WEBUI_HOST}:${AGENT_PORT}`);
+    }
+
     cronJobEveryMinute();
   }
 
