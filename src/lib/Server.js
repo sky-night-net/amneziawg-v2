@@ -390,6 +390,7 @@ module.exports = class Server {
         }
         const NodeManager = require('./NodeManager');
         // Remote Agent QR code (SVG string)
+        setHeader(event, 'Content-Type', 'image/svg+xml');
         return await (new NodeManager()).callAgent(nodeId, `/api/agent/clients/${clientId}/qrcode`);
       }))
       .get('/api/wireguard/client/:clientId/configuration', defineEventHandler(async (event) => {
