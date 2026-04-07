@@ -155,7 +155,6 @@ new Vue({
           shade: 'dark',
           type: 'vertical',
           shadeIntensity: 0,
-          gradientToColors: CHART_COLORS.gradient[this.theme],
           inverseColors: false,
           opacityTo: 0,
           stops: [0, 100],
@@ -522,126 +521,59 @@ new Vue({
 
     this.api = new API();
     this.api.getSession()
-      .then((session) => {
-        this.authenticated = session.authenticated;
-        this.requiresPassword = session.requiresPassword;
-        this.setupComplete = session.setupComplete;
-        if (this.setupComplete) {
-          this.refresh({
-            updateCharts: this.updateCharts,
-          }).catch((err) => {
-            alert(err.message || err.toString());
-          });
-        }
-      })
-      .catch((err) => {
-        alert(err.message || err.toString());
-      });
-
-    this.api.getRememberMeEnabled()
-      .then((rememberMeEnabled) => {
-        this.rememberMeEnabled = rememberMeEnabled;
-      });
-
-    setInterval(() => {
-      this.refresh({
-        updateCharts: this.updateCharts,
-      }).catch(console.error);
-    }, 1000);
-
-    this.api.getuiTrafficStats()
-      .then((res) => {
-        this.uiTrafficStats = res;
-      })
-      .catch(() => {
-        this.uiTrafficStats = false;
-      });
-
-    this.api.getChartType()
-      .then((res) => {
-        this.uiChartType = parseInt(res, 10);
-      })
-      .catch(() => {
-        this.uiChartType = 0;
-      });
-
-    this.api.getWGEnableOneTimeLinks()
-      .then((res) => {
-        this.enableOneTimeLinks = res;
-      })
-      .catch(() => {
-        this.enableOneTimeLinks = false;
-      });
-
-    this.api.getUiSortClients()
-      .then((res) => {
-        this.enableSortClient = res;
-      })
-      .catch(() => {
-        this.enableSortClient = false;
-      });
-
-    this.api.getWGEnableExpireTime()
-      .then((res) => {
-        this.enableExpireTime = res;
-      })
-      .catch(() => {
-        this.enableExpireTime = false;
-      });
-
-    this.api.getAvatarSettings()
-      .then((res) => {
-        this.avatarSettings = res;
-      })
-      .catch(() => {
-          this.avatarSettings = {
-            'dicebear': null,
-            'gravatar': false,
-          };
-      });
-
-    Promise.resolve().then(async () => {
-      this.api.getSession().then(session => {
+      .then(async (session) => {
         this.authenticated = session.authenticated;
         this.requiresPassword = session.requiresPassword;
         this.setupComplete = session.setupComplete;
         this.selectedNodeId = session.selectedNodeId || 'local';
-        
-        if (this.authenticated) {
-          this.loadNodes();
-          this.refresh();
+
+        if (this.setupComplete) {
+          if (this.authenticated) {
+            this.loadNodes();
+            this.refresh();
+          }
         }
-      }).catch(err => {
+        
+        // Load other settings
+        this.api.getRememberMeEnabled().then(res => { this.rememberMeEnabled = res; });
+        this.api.getuiTrafficStats().then(res => { this.uiTrafficStats = res; });
+        this.api.getChartType().then(res => { this.uiChartType = parseInt(res, 10); });
+        this.api.getWGEnableOneTimeLinks().then(res => { this.enableOneTimeLinks = res; });
+        this.api.getUiSortClients().then(res => { this.enableSortClient = res; });
+        this.api.getWGEnableExpireTime().then(res => { this.enableExpireTime = res; });
+        this.api.getAvatarSettings().then(res => { this.avatarSettings = res; });
+
+        const lang = await this.api.getLang();
+        if (lang !== localStorage.getItem('lang') && i18n.availableLocales.includes(lang)) {
+          localStorage.setItem('lang', lang);
+          i18n.locale = lang;
+        }
+
+        const currentRelease = await this.api.getRelease();
+        try {
+          const res = await fetch('https://wg-easy.github.io/wg-easy/changelog.json');
+          const releases = await res.json();
+          const arr = Object.entries(releases).map(([v, c]) => ({ version: parseInt(v, 10), changelog: c }));
+          arr.sort((a, b) => b.version - a.version);
+          const latestRelease = arr[0];
+
+          if (currentRelease < latestRelease.version) {
+            this.currentRelease = currentRelease;
+            this.latestRelease = latestRelease;
+          }
+        } catch (e) {
+          console.error('Update check failed', e);
+        }
+      })
+      .catch((err) => {
+        console.error('Session init error:', err);
         this.authenticated = false;
-        this.setupComplete = true; // Default to true if API fails to avoid wizard loop
+        this.setupComplete = true;
       });
 
-      const lang = await this.api.getLang();
-      if (lang !== localStorage.getItem('lang') && i18n.availableLocales.includes(lang)) {
-        localStorage.setItem('lang', lang);
-        i18n.locale = lang;
-      }
-
-      const currentRelease = await this.api.getRelease();
-      const latestRelease = await fetch('https://wg-easy.github.io/wg-easy/changelog.json')
-        .then((res) => res.json())
-        .then((releases) => {
-          const releasesArray = Object.entries(releases).map(([version, changelog]) => ({
-            version: parseInt(version, 10),
-            changelog,
-          }));
-          releasesArray.sort((a, b) => {
-            return b.version - a.version;
-          });
-
-          return releasesArray[0];
-        });
-
-      if (currentRelease >= latestRelease.version) return;
-
-      this.currentRelease = currentRelease;
-      this.latestRelease = latestRelease;
-    }).catch((err) => console.error(err));
+    setInterval(() => {
+      this.refresh({ updateCharts: this.updateCharts }).catch(console.error);
+    }, 1000);
   },
   computed: {
     selectedNode() {
