@@ -87,6 +87,8 @@ docker run -d \
   --name amnezia-node \
   --restart unless-stopped \
   -v ~/.amnezia-wg:/etc/amnezia-wg \
+  -v /etc/localtime:/etc/localtime:ro \
+  -v /etc/timezone:/etc/timezone:ro \
   -e WG_PORT=$WG_PORT_VAL \
   -e AGENT_PORT=$AGNT_PORT \
   -e WG_DEVICE=$ETH_DEV \
