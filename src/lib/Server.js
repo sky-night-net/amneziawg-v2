@@ -283,22 +283,35 @@ module.exports = class Server {
           if (isPasswordValid(req.headers['authorization'], effectiveHash)) {
             return next();
           }
-          return res.status(401).json({
-            error: 'Incorrect Password',
-          });
+          res.statusCode = 401;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: 'Incorrect Password' }));
+          return;
         }
 
-        return res.status(401).json({
-          error: 'Not Logged In',
-        });
+        res.statusCode = 401;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ error: 'Not Logged In' }));
+        return;
       }),
     );
 
     const router2 = createRouter();
     app.use(router2);
 
-    const getTarget = (event) => {
-      const nodeId = event.node.req.session.selectedNodeId || 'local';
+    const getTarget = async (event) => {
+      let nodeId = event.node.req.session.selectedNodeId || 'local';
+      if (nodeId !== 'local') {
+        try {
+          const NodeManager = require('./NodeManager');
+          const nodes = new NodeManager();
+          await nodes.getNode(nodeId);
+        } catch (e) {
+          nodeId = 'local';
+          event.node.req.session.selectedNodeId = 'local';
+          event.node.req.session.save();
+        }
+      }
       return { nodeId, isLocal: nodeId === 'local' };
     };
 
@@ -312,7 +325,7 @@ module.exports = class Server {
         return { success: true };
       }))
       .get('/api/awg-settings', defineEventHandler(async (event) => {
-        const { nodeId, isLocal } = getTarget(event);
+        const { nodeId, isLocal } = await getTarget(event);
         if (isLocal) return WireGuard.getAwgSettings();
         const NodeManager = require('./NodeManager');
         const config = await (new NodeManager()).callAgent(nodeId, '/api/agent/config');
@@ -320,7 +333,7 @@ module.exports = class Server {
       }))
       .put('/api/awg-settings', defineEventHandler(async (event) => {
         const settings = await readBody(event);
-        const { nodeId, isLocal } = getTarget(event);
+        const { nodeId, isLocal } = await getTarget(event);
         if (isLocal) {
           await WireGuard.updateAwgSettings(settings);
           return { success: true };
@@ -329,13 +342,13 @@ module.exports = class Server {
         return await (new NodeManager()).callAgent(nodeId, '/api/agent/awg-settings', 'post', settings);
       }))
       .get('/api/wireguard/client', defineEventHandler(async (event) => {
-        const { nodeId, isLocal } = getTarget(event);
+        const { nodeId, isLocal } = await getTarget(event);
         if (isLocal) return WireGuard.getClients();
         const NodeManager = require('./NodeManager');
         return await (new NodeManager()).callAgent(nodeId, '/api/agent/clients');
       }))
       .get('/api/wireguard/client/:clientId/qrcode.svg', defineEventHandler(async (event) => {
-        const { nodeId, isLocal } = getTarget(event);
+        const { nodeId, isLocal } = await getTarget(event);
         const clientId = getRouterParam(event, 'clientId');
         if (isLocal) {
           const svg = await WireGuard.getClientQRCodeSVG({ clientId });
@@ -347,7 +360,7 @@ module.exports = class Server {
         return await (new NodeManager()).callAgent(nodeId, `/api/wireguard/client/${clientId}/qrcode.svg`);
       }))
       .get('/api/wireguard/client/:clientId/configuration', defineEventHandler(async (event) => {
-        const { nodeId, isLocal } = getTarget(event);
+        const { nodeId, isLocal } = await getTarget(event);
         const clientId = getRouterParam(event, 'clientId');
         if (isLocal) {
           const client = await WireGuard.getClient({ clientId });
@@ -367,7 +380,7 @@ module.exports = class Server {
         return config;
       }))
       .delete('/api/wireguard/client/:clientId', defineEventHandler(async (event) => {
-        const { nodeId, isLocal } = getTarget(event);
+        const { nodeId, isLocal } = await getTarget(event);
         const clientId = getRouterParam(event, 'clientId');
         if (isLocal) return await WireGuard.deleteClient({ clientId });
         const NodeManager = require('./NodeManager');
