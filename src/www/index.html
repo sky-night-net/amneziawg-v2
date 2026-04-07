@@ -37,21 +37,21 @@
   }
 
   html.light {
-    --bg-body: #f1f5f9;
-    --bg-surface: #fdfdfd;
-    --text-main: #1e293b;
+    --bg-body: #f8fafc;
+    --bg-surface: #ffffff;
+    --text-main: #334155;
     --text-muted: #64748b;
-    --border-main: rgba(0,0,0,0.06);
-    --glass-bg: rgba(255,255,255,0.92);
-    --glass-border: rgba(0,0,0,0.04);
-    --input-bg: #f8fafc;
+    --border-main: #e2e8f0;
+    --glass-bg: rgba(255,255,255,0.9);
+    --glass-border: rgba(0,0,0,0.05);
+    --input-bg: #f1f5f9;
     --input-text: #1e293b;
     --card-bg: #ffffff;
-    --card-hover: #f8fafc;
+    --card-hover: #f1f5f9;
     --btn-ghost-bg: #f1f5f9;
-    --header-gradient: linear-gradient(135deg, #1e293b 0%, #475569 100%);
-    --card-shadow: 0 4px 12px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.02);
-    --modal-shadow: 0 30px 60px rgba(15,23,42,0.1);
+    --header-gradient: linear-gradient(135deg, #475569 0%, #1e293b 100%);
+    --card-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.02);
+    --modal-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.02);
   }
 
   body {
@@ -172,8 +172,22 @@
   }
   .btn-ghost:hover {
     background: var(--border-main);
-    border-color: var(--text-muted);
+    color: var(--text-main);
   }
+  .btn-header {
+    background: #374151;
+    border: 1px solid #4b5563;
+    color: #e5e7eb;
+    border-radius: 6px;
+    height: 34px;
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex; align-items: center; gap: 8px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-header:hover { background: #4b5563; border-color: #6b7280; }
+  .btn-header.primary { background: #5a5a5a; }
 
   /* Client card */
   .client-card {
@@ -236,14 +250,26 @@
 
   /* Avatar */
   .avatar {
-    width: 42px; height: 42px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, rgba(220,38,38,0.3), rgba(120,0,200,0.2));
-    border: 1px solid rgba(220,38,38,0.3);
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.05);
     display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 16px; color: #fca5a5;
+    font-weight: 700; font-size: 16px; color: #4b5563;
     flex-shrink: 0;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
+  .avatar svg { width: 22px; height: 22px; color: #9ca3af; }
+  .avatar .status-dot {
+    position: absolute;
+    bottom: 2px; right: 2px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+  }
+  .avatar .status-dot.online { background: #ef4444; }
+  .avatar .status-dot.offline { background: #9ca3af; }
 
   /* Header */
   .header-logo {
@@ -266,10 +292,18 @@
     border: 1px solid rgba(220,38,38,0.2);
   }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border-main); border-radius: 4px; }
+  /* Icon button (square/dark style) */
+  .icon-btn {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 4px;
+    background: #374151;
+    color: #9ca3af;
+    border: none;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .icon-btn:hover { background: #4b5563; color: #ffffff; }
+  .icon-btn.danger:hover { background: #991b1b; }
 
   /* Modal backdrop */
   .modal-backdrop {
@@ -315,6 +349,17 @@
     font-size: 10px; font-weight: 700; text-transform: uppercase;
     letter-spacing: 1.2px; color: var(--text-muted);
   }
+
+  /* Spinner */
+  .spinner {
+    width: 28px; height: 28px;
+    border: 3px solid rgba(220,38,38,0.1);
+    border-top-color: #dc2626;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   /* Empty state */
   .empty-state {
@@ -374,6 +419,7 @@
   .node-item .url { font-size: 11px; color: var(--text-muted); }
 
   /* Toggle Switch */
+  /* Toggle Switch (RED style) */
   .toggle-switch {
     position: relative;
     display: inline-block;
@@ -384,25 +430,21 @@
   .toggle-switch input { display: none; }
   .toggle-slider {
     position: absolute; inset: 0;
-    background-color: rgba(255,255,255,0.15);
+    background-color: #374151;
     border-radius: 24px; transition: .3s;
-    border: 1px solid rgba(255,255,255,0.08);
   }
   .toggle-slider:before {
     position: absolute; content: "";
-    height: 18px; width: 18px; left: 2px; bottom: 2px;
+    height: 18px; width: 18px; left: 3px; bottom: 3px;
     background-color: white;
     border-radius: 50%; transition: .3s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
   .toggle-switch input:checked + .toggle-slider {
-    background-color: #10b981; /* Green */
-    border-color: #10b981;
+    background-color: #dc2626; /* Red */
   }
   .toggle-switch input:checked + .toggle-slider:before {
     transform: translateX(20px);
   }
-  .toggle-switch.disabled .toggle-slider { opacity: 0.5; cursor: not-allowed; }
 
   /* Transition */
   .fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
@@ -574,28 +616,26 @@
           <div v-if="latestRelease" style="margin-bottom:20px; background:rgba(220,38,38,0.1); border:1px solid rgba(220,38,38,0.3); border-radius:14px; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
             <div>
               <div style="font-weight:700; font-size:13px; color:#fca5a5;">🔄 {{$t('updateAvailable')}}</div>
-              <div style="font-size:12px; color:rgba(255,255,255,0.5); margin-top:2px;">{{latestRelease.changelog}}</div>
-            </div>
-            <a href="https://github.com/wg-easy/wg-easy#updating" target="_blank" class="btn-primary" style="padding:8px 16px; font-size:12px; text-decoration:none; white-space:nowrap;">
-              {{$t('update')}}
-            </a>
-          </div>
-
-          <!-- Client Panel -->
-          <div class="glass" style="border-radius:20px; overflow:hidden;">
+              <div styl          <!-- Client Panel -->
+          <div style="background:#2e2e2e; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.05); box-shadow:0 10px 40px rgba(0,0,0,0.2);">
             <!-- Panel Header -->
-            <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid rgba(255,255,255,0.06);">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 22px; border-bottom:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02);">
               <div style="display:flex; align-items:center; gap:12px;">
-                <span style="font-size:18px; font-weight:700; color:#ffffff;">{{$t('clients')}}</span>
-                <span class="badge" v-if="clients">{{clients.length}}</span>
+                <span style="font-size:20px; font-weight:700; color:#ffffff;">{{$t('clients')}}</span>
               </div>
-              <div style="display:flex; gap:8px; align-items:center;">
-                <!-- AWG Settings -->
-                <button @click="openAwgSettings()" class="icon-btn" title="AmneziaWG Settings">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              <div style="display:flex; gap:10px; align-items:center;">
+                <!-- Restore -->
+                <button @click="clientRestore" class="btn-header">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+                  {{$t('restore')}}
+                </button>
+                <!-- Backup -->
+                <button @click="clientBackup" class="btn-header">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V17.25m14.25-12.75v3.375c0 .621-.504 1.125-1.125 1.125H5.25a1.125 1.125 0 0 1-1.125-1.125V4.5m14.25 0A2.25 2.25 0 0 0 16.5 2.25h-9A2.25 2.25 0 0 0 5.25 4.5m14.25 0v12.75a2.25 2.25 0 0 1-2.25 2.25H6.75a2.25 2.25 0 0 1-2.25-2.25V4.5m10.5 5.25-3.75 3.75m0 0-3.75-3.75m3.75 3.75V3" /></svg>
+                  {{$t('backup')}}
                 </button>
                 <!-- New Client -->
-                <button @click="clientCreate = true; clientCreateName = ''; clientExpiredDate = '';" class="btn-primary" style="padding:8px 18px; font-size:13px; display:flex; align-items:center; gap:6px;">
+                <button @click="clientCreate = true; clientCreateName = ''; clientExpiredDate = '';" class="btn-header primary">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                   {{$t('new')}}
                 </button>
@@ -603,48 +643,46 @@
             </div>
 
             <!-- Client list -->
-            <div style="padding: 12px;">
+            <div style="padding: 0;">
               <transition-group name="slide" tag="div">
-                <div v-if="clients && clients.length > 0" v-for="client in clients" :key="client.id" class="client-card">
-                  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                <div v-if="clients && clients.length > 0" v-for="client in clients" :key="client.id" 
+                     class="client-card" style="margin-bottom:0; border-radius:0; border-left:none; border-right:none; border-top:none; padding:14px 22px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; width:100%;">
                     <!-- Left: avatar + info -->
-                    <div style="display:flex; align-items:center; gap:14px; flex:1; min-width:0;">
+                    <div style="display:flex; align-items:center; gap:18px; flex:1; min-width:0;">
                       <div class="avatar">
-                        <img v-if="client.avatar" :src="client.avatar" style="width:100%;height:100%;border-radius:12px;object-fit:cover;" />
-                        <span v-else>{{ client.name[0].toUpperCase() }}</span>
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        <div class="status-dot" :class="client.latestHandshakeAt ? 'online' : 'offline'"></div>
                       </div>
                       <div style="min-width:0; flex:1;">
-                        <div style="font-weight:600; font-size:15px; color:var(--text-main); display:flex; align-items:center; gap:8px;">
-                          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">{{ client.name }}</span>
-                          <div :class="client.latestHandshakeAt ? 'dot-online' : 'dot-offline'" style="flex-shrink:0;"></div>
+                        <div style="font-weight:700; font-size:17px; color:#ffffff; line-height:1.2;">{{ client.name }}</div>
+                        <div style="display:flex; align-items:center; gap:10px; margin-top:4px;">
+                          <span style="font-size:13px; color:rgba(255,255,255,0.4); font-family:monospace;">{{ client.address }}</span>
+                          <!-- Traffic stats inline -->
+                          <div style="display:flex; align-items:center; gap:12px; font-family:monospace; font-size:11px; opacity:0.6;">
+                            <div style="display:flex; align-items:center; gap:4px;"><span style="color:#ffffff; font-weight:bold;">↑</span> {{ client.transferTx | bytes }}</div>
+                            <div style="display:flex; align-items:center; gap:4px;"><span style="color:#ffffff; font-weight:bold;">↓</span> {{ client.transferRx | bytes }}</div>
+                            <span v-if="client.latestHandshakeAt" style="font-size:12px;"> • {{ client.latestHandshakeAt | timeago }}</span>
+                          </div>
                         </div>
-                        <div style="font-size:12px; color:var(--text-muted); margin-top:2px; font-family:monospace;">{{ client.address }}</div>
-                        <div v-if="client.latestHandshakeAt" style="font-size:11px; color:var(--text-muted); opacity:0.6;">{{ client.latestHandshakeAt | timeago }}</div>
                       </div>
                     </div>
 
-                    <!-- Right: stats + actions -->
-                    <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
-                      <!-- Traffic stats -->
-                      <div style="font-family:monospace; font-size:10px; color:rgba(255,255,255,0.4); text-align:right; line-height:1.4; margin-right:8px; display:flex; flex-direction:column; gap:2px;">
-                        <div><span style="color:#fca5a5;">↑</span> {{ client.transferTx | bytes }}</div>
-                        <div><span style="color:#60a5fa;">↓</span> {{ client.transferRx | bytes }}</div>
-                      </div>
-                      <!-- QR -->
-                      <button @click="qrcode = './api/wireguard/client/' + client.id + '/qrcode.svg'" class="icon-btn" :title="$t('showQR')">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" /></svg>
-                      </button>
-                      <!-- Download config -->
-                      <a :href="'./api/wireguard/client/' + client.id + '/configuration'" download class="icon-btn" :title="$t('downloadConfig')" style="color:#60a5fa;">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                      </a>
-                      
+                    <!-- Right: actions -->
+                    <div style="display:flex; align-items:center; gap:14px; flex-shrink:0;">
                       <!-- Enable / Disable (Toggle) -->
-                      <label class="toggle-switch" style="margin:0 4px;" :title="client.enabled ? $t('disableClient') : $t('enableClient')">
+                      <label class="toggle-switch" :title="client.enabled ? $t('disableClient') : $t('enableClient')">
                         <input type="checkbox" :checked="client.enabled" @change="client.enabled ? disableClient(client) : enableClient(client)">
                         <span class="toggle-slider"></span>
                       </label>
-
+                      <!-- QR -->
+                      <button @click="qrcode = './api/wireguard/client/' + client.id + '/qrcode.svg'" class="icon-btn" :title="$t('showQR')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" /></svg>
+                      </button>
+                      <!-- Download config -->
+                      <a :href="'./api/wireguard/client/' + client.id + '/configuration'" download class="icon-btn" :title="$t('downloadConfig')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                      </a>
                       <!-- Delete -->
                       <button @click="clientDelete = client" class="icon-btn danger" :title="$t('deleteClient')">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
@@ -662,7 +700,7 @@
 
               <!-- Loading state -->
               <div v-if="clients === null" class="empty-state">
-                <div style="font-size:24px; animation:spin 1s linear infinite; display:inline-block;">◌</div>
+                <div class="spinner"></div>
                 <p>Loading...</p>
               </div>
             </div>
