@@ -415,6 +415,9 @@ new Vue({
         .catch((err) => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
+    clientRestore() {
+      this.$refs.restoreInput.click();
+    },
     restoreConfig(e) {
       e.preventDefault();
       const file = e.currentTarget.files.item(0);
@@ -430,6 +433,26 @@ new Vue({
       } else {
         alert('Failed to load your file!');
       }
+      e.target.value = ''; // Reset input
+    },
+    clientBackup() {
+      const config = this.clients.map(c => ({
+        name: c.name,
+        allocated_ips: c.allocated_ips,
+        public_key: c.public_key,
+        enabled: c.enabled
+      }));
+      const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `amnezia-wg-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    toggleCharts() {
+      this.uiShowCharts = !this.uiShowCharts;
+      localStorage.setItem('uiShowCharts', this.uiShowCharts ? '1' : '0');
     },
     toggleTheme() {
       // Cycle: dark -> light -> auto (follow OS)
