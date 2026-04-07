@@ -29,6 +29,19 @@ module.exports = class WireGuard {
         });
         const address = Config.WG_DEFAULT_ADDRESS.replace('x', '1');
 
+        // Zero-Touch Setup: If environment variables are present on first run, auto-complete setup
+        const autoHost = Config.WG_HOST;
+        const autoPassword = Config.ADMIN_PASSWORD;
+        let passwordHash = null;
+        let setupComplete = !!autoHost;
+
+        if (autoHost && autoPassword) {
+          const bcrypt = require('bcryptjs');
+          passwordHash = bcrypt.hashSync(autoPassword, 10);
+          setupComplete = true;
+          debug('Zero-Touch Setup: Automated configuration completed via environment variables.');
+        }
+
         config = {
           server: {
             privateKey,
@@ -48,11 +61,11 @@ module.exports = class WireGuard {
             i3: Config.I3,
             i4: Config.I4,
             i5: Config.I5,
-            host: Config.WG_HOST,
+            host: autoHost,
             port: Config.WG_PORT,
             device: Config.WG_DEVICE,
-            passwordHash: null,
-            setupComplete: !!Config.WG_HOST,
+            passwordHash,
+            setupComplete,
           },
           clients: {},
         };

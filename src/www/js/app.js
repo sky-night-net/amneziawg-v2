@@ -70,7 +70,7 @@ new Vue({
     setupComplete: true,
     setupData: {
       host: window.location.hostname,
-      port: 51820,
+      port: 51820, // Default WG port
       password: '',
     },
     password: null,

@@ -59,10 +59,20 @@ sysctl -p /etc/sysctl.d/99-amnezia-forwarding.conf > /dev/null
 
 # 5. Настройка
 echo -e "\n${BLUE}[4/5] Настройка...${NC}"
+
+# Попытка определить внешний IP
+AUTO_IP=$(curl -s --connect-timeout 2 ifconfig.me || curl -s --connect-timeout 2 icanhazip.com || echo "0.0.0.0")
+
 echo -e "Нажмите ENTER, чтобы использовать значения по умолчанию."
 
-read -p "Имя этого сервера (например: Sofia-BG / Frankfurt-DE): " NODE_NAME < /dev/tty
+read -p "Имя этого сервера (напр. Sofia-Hub): " NODE_NAME < /dev/tty
 NODE_NAME=${NODE_NAME:-"My Server"}
+
+read -p "Публичный IP сервера (по умолчанию $AUTO_IP): " WG_HOST < /dev/tty
+WG_HOST=${WG_HOST:-$AUTO_IP}
+
+read -p "Пароль администратора (по умолчанию 'admin'): " ADMIN_PWD < /dev/tty
+ADMIN_PWD=${ADMIN_PWD:-"admin"}
 
 read -p "Порт Web UI (по умолчанию 51821): " GUI_PORT < /dev/tty
 GUI_PORT=${GUI_PORT:-51821}
@@ -99,6 +109,8 @@ docker run -d \
   -e AGENT_PORT=$AGNT_PORT \
   -e WG_DEVICE=eth0 \
   -e NODE_NAME="$NODE_NAME" \
+  -e WG_HOST="$WG_HOST" \
+  -e ADMIN_PASSWORD="$ADMIN_PWD" \
   -p $WG_PORT_VAL:$WG_PORT_VAL/udp \
   -p $GUI_PORT:51821/tcp \
   -p $AGNT_PORT:$AGNT_PORT/tcp \
