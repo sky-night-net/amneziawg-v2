@@ -335,11 +335,12 @@
     border-radius: 12px;
     padding: 8px 32px 8px 14px;
     cursor: pointer;
-    min-width: 140px;
+    min-width: 180px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     transition: all 0.2s;
+    position: relative;
   }
   .node-switcher-current:hover { border-color: rgba(220,38,38,0.5); background: var(--border-main); }
   .node-switcher-current .name { font-size: 13px; font-weight: 700; color: var(--text-main); }
@@ -506,13 +507,13 @@
                 <div class="section-label">{{$t('servers')}}:</div>
                 <div class="node-switcher">
                   <div class="node-switcher-current" @click="nodeDropdownOpen = !nodeDropdownOpen">
-                    <span class="name" style="display:flex; align-items:center; gap:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px;">
+                    <span class="name" style="display:flex; align-items:center; gap:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:200px;">
                       {{ selectedNode ? selectedNode.name : 'Loading...' }}
                       <span v-if="selectedNode && selectedNode.url === 'local'" class="hub-badge">HUB</span>
                     </span>
-                    <span class="url" v-if="selectedNode && selectedNode.url !== 'local'" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px;">{{ selectedNode.url.replace(/^https?:\/\//, '').replace(/:[0-9]+$/, '') }}</span>
-                    <span class="url" v-if="selectedNode && selectedNode.url === 'local'" style="color:rgba(74,222,128,0.5);">Этот сервер</span>
-                    <svg style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;width:14px;height:14px;color:rgba(255,255,255,0.4);" 
+                    <span class="url" v-if="selectedNode && selectedNode.url !== 'local'" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:200px;">{{ selectedNode.url.replace(/^https?:\/\//, '').replace(/:[0-9]+$/, '') }}</span>
+                    <span class="url" v-if="selectedNode && selectedNode.url === 'local'" style="color:var(--text-muted); opacity:0.6;">{{$t('localNode')}}</span>
+                    <svg style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;width:14px;height:14px;color:var(--text-muted);" 
                          xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                     </svg>
