@@ -465,9 +465,9 @@
                     <!-- Right: stats + actions -->
                     <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
                       <!-- Traffic stats -->
-                      <div v-if="uiTrafficStats" style="font-family:monospace; font-size:10px; color:rgba(255,255,255,0.3); text-align:right; line-height:1.5; margin-right:8px;">
-                        <div>↑ {{ client.transferTxCurrent | bytes }}/s</div>
-                        <div>↓ {{ client.transferRxCurrent | bytes }}/s</div>
+                      <div style="font-family:monospace; font-size:10px; color:rgba(255,255,255,0.4); text-align:right; line-height:1.4; margin-right:8px; display:flex; flex-direction:column; gap:2px;">
+                        <div><span style="color:#fca5a5;">↑</span> {{ client.transferTx | bytes }}</div>
+                        <div><span style="color:#60a5fa;">↓</span> {{ client.transferRx | bytes }}</div>
                       </div>
                       <!-- QR -->
                       <button @click="qrcode = './api/wireguard/client/' + client.id + '/qrcode.svg'" class="icon-btn" :title="$t('showQR')">
