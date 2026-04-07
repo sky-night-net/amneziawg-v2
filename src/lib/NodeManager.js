@@ -10,10 +10,11 @@ const NODES_FILE = path.join(WG_PATH, 'nodes.json');
 
 module.exports = class NodeManager {
   constructor() {
+    const { NODE_NAME } = process.env;
     this.nodes = [];
     this.localNode = {
       id: 'local',
-      name: 'Local Node',
+      name: NODE_NAME || 'Local Hub',
       url: 'local',
       token: HUB_TOKEN,
       active: true,

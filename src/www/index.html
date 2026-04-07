@@ -404,8 +404,12 @@
                 <div class="section-label">{{$t('servers')}}:</div>
                 <div class="node-switcher">
                   <div class="node-switcher-current" @click="nodeDropdownOpen = !nodeDropdownOpen">
-                    <div class="name">{{ selectedNode ? selectedNode.name : '...' }}</div>
+                    <div class="name" style="display:flex; align-items:center; gap:6px;">
+                      {{ selectedNode ? selectedNode.name : 'Loading...' }}
+                      <span v-if="selectedNode && selectedNode.url === 'local'" style="font-size:9px; background:rgba(34,197,94,0.2); color:#4ade80; padding:1px 5px; border-radius:4px; font-weight:600;">HUB</span>
+                    </div>
                     <div class="url" v-if="selectedNode && selectedNode.url !== 'local'">{{ selectedNode.url.replace(/^https?:\/\//, '').replace(/:[0-9]+$/, '') }}</div>
+                    <div class="url" v-if="selectedNode && selectedNode.url === 'local'" style="color:rgba(74,222,128,0.5);">Этот сервер</div>
                     <svg style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;width:14px;height:14px;color:rgba(255,255,255,0.4);" 
                          xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
@@ -414,8 +418,12 @@
                   <div v-if="nodeDropdownOpen" class="node-switcher-list">
                     <div v-for="node in nodes" :key="node.id" class="node-item" :class="node.id === selectedNodeId ? 'active' : ''"
                          @click="selectNode(node.id); nodeDropdownOpen = false">
-                      <span class="name">{{ node.name }}</span>
+                      <span class="name" style="display:flex; align-items:center; gap:6px;">
+                        {{ node.name }}
+                        <span v-if="node.url === 'local'" style="font-size:9px; background:rgba(34,197,94,0.2); color:#4ade80; padding:1px 5px; border-radius:4px;">HUB</span>
+                      </span>
                       <span class="url" v-if="node.url !== 'local'">{{ node.url }}</span>
+                      <span class="url" v-else style="color:rgba(74,222,128,0.45);">Этот сервер (Hub)</span>
                     </div>
                   </div>
                   <!-- Click overlay to close dropdown -->

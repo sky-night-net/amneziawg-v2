@@ -57,9 +57,12 @@ echo "net.ipv4.ip_forward=1" > /etc/sysctl.d/99-amnezia-forwarding.conf
 echo "net.ipv4.conf.all.src_valid_mark=1" >> /etc/sysctl.d/99-amnezia-forwarding.conf
 sysctl -p /etc/sysctl.d/99-amnezia-forwarding.conf > /dev/null
 
-# 5. Выбор портов (Интерактивный режим)
-echo -e "\n${BLUE}[4/5] Настройка сетевых портов...${NC}"
+# 5. Настройка
+echo -e "\n${BLUE}[4/5] Настройка...${NC}"
 echo -e "Нажмите ENTER, чтобы использовать значения по умолчанию."
+
+read -p "Имя этого сервера (например: Sofia-BG / Frankfurt-DE): " NODE_NAME < /dev/tty
+NODE_NAME=${NODE_NAME:-"My Server"}
 
 read -p "Порт Web UI (по умолчанию 51821): " GUI_PORT < /dev/tty
 GUI_PORT=${GUI_PORT:-51821}
@@ -95,6 +98,7 @@ docker run -d \
   -e WG_PORT=$WG_PORT_VAL \
   -e AGENT_PORT=$AGNT_PORT \
   -e WG_DEVICE=eth0 \
+  -e NODE_NAME="$NODE_NAME" \
   -p $WG_PORT_VAL:$WG_PORT_VAL/udp \
   -p $GUI_PORT:51821/tcp \
   -p $AGNT_PORT:$AGNT_PORT/tcp \
