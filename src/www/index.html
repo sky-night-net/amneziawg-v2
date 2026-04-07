@@ -286,15 +286,8 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
   .avatar svg { width: 22px; height: 22px; color: #9ca3af; }
-  .avatar .status-dot {
-    position: absolute;
-    bottom: 2px; right: 2px;
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    border: 2px solid #ffffff;
-  }
-  .avatar .status-dot.online { background: #ef4444; }
-  .avatar .status-dot.offline { background: #9ca3af; }
+  .avatar .status-dot.online { background: #22c55e; box-shadow: 0 0 10px rgba(34,197,94,0.5); }
+  .avatar .status-dot.offline { background: #94a3b8; }
 
   /* Header */
   .header-logo {
@@ -530,11 +523,11 @@
             <h1 style="font-size:40px; font-weight:800; background:var(--header-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-1.5px; margin:0;">AmneziaWG</h1>
             <div style="margin-top:12px; display:flex; flex-direction:column; align-items:center;">
               <a href="https://t.me/skynight_network" target="_blank" 
-                 style="font-size:16px; font-weight:600; color:var(--text-muted); text-decoration:none; transition:all 0.2s; display:flex; align-items:center; gap:8px;"
+                 style="font-size:18px; font-weight:700; color:var(--text-muted); text-decoration:none; transition:all 0.2s; display:flex; align-items:center; gap:8px;"
                  onmouseover="this.style.color='#ef4444'; this.style.opacity='1'" 
                  onmouseout="this.style.color='var(--text-muted)'; this.style.opacity='0.6'">
                 {{$t('appDesigner')}}
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="opacity:0.8;"><path d="M11.944 0C5.356 0 0 5.356 0 11.944c0 6.589 5.356 12 11.944 12 6.589 0 12-5.411 12-12C23.944 5.356 18.533 0 11.944 0zm5.667 8.222l-1.944 9.167c-.139.611-.5.75-.972.5l-2.944-2.167-1.417 1.361c-.167.167-.278.278-.583.278l.222-3 5.472-4.944c.222-.222-.056-.333-.333-.139L8.333 13.944l-2.889-.917c-.639-.194-.639-.639.111-.944l11.389-4.389c.528-.194.972.139.667.444z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="opacity:0.8;"><path d="M11.944 0C5.356 0 0 5.356 0 11.944c0 6.589 5.356 12 11.944 12 6.589 0 12-5.411 12-12C23.944 5.356 18.533 0 11.944 0zm5.667 8.222l-1.944 9.167c-.139.611-.5.75-.972.5l-2.944-2.167-1.417 1.361c-.167.167-.278.278-.583.278l.222-3 5.472-4.944c.222-.222-.056-.333-.333-.139L8.333 13.944l-2.889-.917c-.639-.194-.639-.639.111-.944l11.389-4.389c.528-.194.972.139.667.444z"/></svg>
               </a>
             </div>
           </div>
