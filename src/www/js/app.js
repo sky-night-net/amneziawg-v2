@@ -433,8 +433,8 @@ new Vue({
       }
     },
     toggleTheme() {
-      // Cycle: dark -> auto (follow OS) -> dark
-      const themes = ['dark', 'auto'];
+      // Cycle: dark -> light -> auto (follow OS)
+      const themes = ['dark', 'light', 'auto'];
       const currentIndex = themes.indexOf(this.uiTheme);
       const newIndex = (currentIndex + 1) % themes.length;
       this.uiTheme = themes[newIndex];
@@ -443,9 +443,9 @@ new Vue({
     },
     setTheme(theme) {
       const { classList } = document.documentElement;
-      const shouldBeDark = theme !== 'auto' || (theme === 'auto' && this.prefersDarkScheme.matches);
-      classList.toggle('dark', shouldBeDark);
-      classList.remove('light');
+      const isDarkSet = theme === 'dark' || (theme === 'auto' && this.prefersDarkScheme.matches);
+      classList.toggle('dark', isDarkSet);
+      classList.toggle('light', !isDarkSet);
     },
     handlePrefersChange(e) {
       if (localStorage.theme === 'auto') {
