@@ -22,32 +22,36 @@
     --bg-body: #0a0a0f;
     --bg-surface: #111118;
     --text-main: #ffffff;
-    --text-muted: rgba(255,255,255,0.4);
-    --border-main: rgba(255,255,255,0.1);
+    --text-muted: rgba(255,255,255,0.45);
+    --border-main: rgba(255,255,255,0.08);
     --glass-bg: rgba(255,255,255,0.03);
     --glass-border: rgba(255,255,255,0.08);
     --input-bg: rgba(255,255,255,0.05);
     --input-text: #ffffff;
-    --card-bg: rgba(255,255,255,0.03);
-    --card-hover: rgba(255,255,255,0.06);
+    --card-bg: rgba(255,255,255,0.02);
+    --card-hover: rgba(255,255,255,0.05);
     --btn-ghost-bg: rgba(255,255,255,0.05);
     --header-gradient: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+    --card-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    --modal-shadow: 0 32px 80px rgba(0,0,0,0.6);
   }
 
   html.light {
-    --bg-body: #f4f7f9;
+    --bg-body: #f1f5f9;
     --bg-surface: #ffffff;
     --text-main: #0f172a;
     --text-muted: #64748b;
-    --border-main: rgba(0,0,0,0.06);
-    --glass-bg: rgba(255,255,255,0.8);
+    --border-main: rgba(0,0,0,0.08);
+    --glass-bg: rgba(255,255,255,0.9);
     --glass-border: rgba(0,0,0,0.05);
     --input-bg: #f8fafc;
     --input-text: #0f172a;
     --card-bg: #ffffff;
     --card-hover: #fdfdfd;
-    --btn-ghost-bg: #f1f5f9;
+    --btn-ghost-bg: #e2e8f0;
     --header-gradient: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+    --card-shadow: 0 10px 30px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02);
+    --modal-shadow: 0 40px 100px rgba(0,0,0,0.12);
   }
 
   body {
@@ -63,20 +67,22 @@
     position: fixed;
     inset: 0;
     z-index: 0;
-    background: var(--bg-body);
     pointer-events: none;
+    transition: background 0.5s ease;
   }
-  .dark .bg-mesh {
-    background:
+  html.dark .bg-mesh {
+    background: var(--bg-body);
+    background-image:
       radial-gradient(ellipse 80% 50% at 20% 40%, rgba(158, 0, 30, 0.12) 0%, transparent 60%),
       radial-gradient(ellipse 60% 80% at 80% 20%, rgba(120, 0, 200, 0.08) 0%, transparent 60%),
       radial-gradient(ellipse 100% 60% at 60% 80%, rgba(0, 60, 180, 0.06) 0%, transparent 50%);
   }
-  .light .bg-mesh {
-    background:
-      radial-gradient(ellipse 80% 50% at 20% 40%, rgba(220, 38, 38, 0.05) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 80% at 80% 20%, rgba(120, 0, 200, 0.04) 0%, transparent 60%),
-      radial-gradient(ellipse 100% 60% at 60% 80%, rgba(59, 130, 246, 0.04) 0%, transparent 50%);
+  html.light .bg-mesh {
+    background: #f1f5f9;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 20% 40%, rgba(220, 38, 38, 0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 20%, rgba(59, 130, 246, 0.03) 0%, transparent 60%),
+      radial-gradient(ellipse 100% 60% at 100% 100%, rgba(255, 255, 255, 1) 0%, transparent 50%);
   }
 
   /* Glass card */
@@ -100,52 +106,72 @@
     border: 1px solid var(--border-main);
     color: var(--input-text);
     border-radius: 12px;
-    padding: 12px 16px;
-    grid: 100%;
+    padding: 0 16px;
+    height: 46px;
+    width: 100%;
     outline: none;
     transition: all 0.2s;
     font-size: 14px;
+    display: flex;
+    align-items: center;
   }
   .input-dark:focus {
-    border-color: rgba(220, 38, 38, 0.6);
+    border-color: rgba(220, 38, 38, 0.5);
     background: var(--input-bg);
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
   }
-  .input-dark::placeholder { color: var(--text-muted); }
+  .input-dark::placeholder { color: var(--text-muted); opacity: 0.6; }
+  
+  /* Fix autocomplete background */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover, 
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--input-text);
+    -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
 
   /* Button styles */
   .btn-primary {
-    background: linear-gradient(135deg, #dc2626, #9b1c1c);
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
     color: white;
     font-weight: 700;
     border-radius: 12px;
-    padding: 12px 24px;
+    height: 46px;
+    padding: 0 24px;
     border: none;
     cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
   .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 30px rgba(220, 38, 38, 0.45);
-    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    transform: translateY(-1.5px);
+    box-shadow: 0 8px 24px rgba(220, 38, 38, 0.35);
+    background: linear-gradient(135deg, #ef4444, #dc2626);
   }
   .btn-primary:active { transform: translateY(0); }
 
   .btn-ghost {
     background: var(--btn-ghost-bg);
     border: 1px solid var(--border-main);
-    color: var(--text-muted);
-    border-radius: 10px;
-    padding: 10px 18px;
+    color: var(--text-main);
+    border-radius: 12px;
+    height: 46px;
+    padding: 0 20px;
     cursor: pointer;
     transition: all 0.2s;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .btn-ghost:hover {
-    background: var(--btn-ghost-bg);
-    color: var(--text-main);
+    background: var(--border-main);
     border-color: var(--text-muted);
   }
 
@@ -237,33 +263,42 @@
 
   /* Modal backdrop */
   .modal-backdrop {
-    position: fixed; inset: 0; z-index: 60;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(8px);
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     display: flex; align-items: center; justify-content: center; padding: 20px;
+    transition: all 0.3s ease;
   }
   .modal-box {
     background: var(--bg-surface);
     border: 1px solid var(--border-main);
-    border-radius: 24px;
-    width: 100%; max-width: 480px;
-    box-shadow: 0 32px 80px rgba(0,0,0,0.2);
+    border-radius: 28px;
+    width: 100%; 
+    box-shadow: var(--modal-shadow);
     overflow: hidden;
+    animation: modal-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes modal-in {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
 
-  /* Icon button */
-  .icon-btn {
-    width: 34px; height: 34px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 10px;
-    background: var(--btn-ghost-bg);
-    border: 1px solid var(--border-main);
-    color: var(--text-muted);
-    cursor: pointer; transition: all 0.2s;
+  /* Spinner */
+  .spinner {
+    width: 20px; height: 20px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
   }
-  .icon-btn:hover { background: var(--border-main); color: var(--text-main); }
-  .icon-btn.danger:hover { background: rgba(220,38,38,0.1); color: #ef4444; border-color: rgba(220,38,38,0.2); }
-  .icon-btn.active { background: rgba(220,38,38,0.1); color: #ef4444; border-color: rgba(220,38,38,0.2); }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Fade transition */
+  .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+  .fade-enter, .fade-leave-to { opacity: 0; }
 
   /* Section header */
   .section-label {
@@ -285,9 +320,9 @@
     z-index: 50;
   }
   .node-switcher-current {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 10px;
+    background: var(--btn-ghost-bg);
+    border: 1px solid var(--border-main);
+    border-radius: 12px;
     padding: 8px 32px 8px 14px;
     cursor: pointer;
     min-width: 140px;
@@ -296,34 +331,36 @@
     justify-content: center;
     transition: all 0.2s;
   }
-  .node-switcher-current:hover { border-color: rgba(220,38,38,0.5); }
-  .node-switcher-current .name { font-size: 13px; font-weight: 700; color: #ffffff; }
-  .node-switcher-current .url { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 1px; }
+  .node-switcher-current:hover { border-color: rgba(220,38,38,0.5); background: var(--border-main); }
+  .node-switcher-current .name { font-size: 13px; font-weight: 700; color: var(--text-main); }
+  .node-switcher-current .url { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
   
   .node-switcher-list {
     position: absolute;
     top: calc(100% + 8px);
     left: 0; right: 0;
-    background: #111118;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-main);
+    border-radius: 14px;
+    box-shadow: var(--modal-shadow);
     overflow: hidden;
     animation: slide-up 0.2s ease-out;
   }
   @keyframes slide-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   
   .node-item {
-    padding: 10px 14px;
+    padding: 12px 14px;
     cursor: pointer;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    transition: background 0.2s;
+    transition: all 0.2s;
+    border-bottom: 1px solid var(--border-main);
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
   .node-item:last-child { border-bottom: none; }
-  .node-item:hover { background: rgba(255,255,255,0.055); }
-  .node-item.active { background: rgba(220,38,38,0.1); border-left: 3px solid #dc2626; }
-  .node-item .name { font-size: 13px; font-weight: 600; color: #ffffff; display: block; }
-  .node-item .url { font-size: 10px; color: rgba(255,255,255,0.3); display: block; margin-top: 2px; }
+  .node-item:hover { background: var(--border-main); }
+  .node-item .name { font-size: 13px; font-weight: 600; color: var(--text-main); }
+  .node-item .url { font-size: 11px; color: var(--text-muted); }
 
   /* Toggle Switch */
   .toggle-switch {
@@ -404,31 +441,30 @@
         </div>
       </transition>
 
-      <!-- ══════════════════════════════════════════
-           LOGIN SCREEN
-      ══════════════════════════════════════════ -->
+      <!-- LOGIN SCREEN -->
       <transition name="fade">
         <div v-if="setupComplete === true && authenticated === false"
-             style="min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px;">
-          <div style="margin-bottom:32px; text-align:center;">
-            <img src="./img/logo.svg" width="72" style="margin:0 auto 16px;" />
-            <h1 style="font-size:32px; font-weight:800; background:linear-gradient(135deg,#fff,rgba(255,255,255,0.5)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-1px;">AmneziaWG</h1>
-            <p style="font-size:13px; color:rgba(255,255,255,0.3); margin-top:6px;">Multi-Node VPN Hub</p>
+             style="min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; position:relative; z-index:10;">
+          <div style="margin-bottom:40px; text-align:center;">
+            <div style="background:var(--btn-ghost-bg); width:80px; height:80px; border-radius:24px; display:flex; align-items:center; justify-content:center; margin:0 auto 24px; border:1px solid var(--border-main); box-shadow:var(--card-shadow);">
+              <img src="./img/logo.svg" width="48" />
+            </div>
+            <h1 style="font-size:36px; font-weight:800; background:var(--header-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-1.5px; margin:0;">AmneziaWG</h1>
+            <p style="font-size:14px; font-weight:500; color:var(--text-muted); margin-top:8px;">{{$t('appSubtitle') || 'Multi-Node VPN Hub'}}</p>
           </div>
-          <div class="modal-box" style="max-width:360px;">
-            <form @submit="login" style="padding:32px;">
-              <div style="margin-bottom:16px;">
+          <div class="modal-box" style="max-width:400px; padding:32px;">
+            <form @submit.prevent="login">
+              <div style="margin-bottom:20px;">
                 <input type="password" v-model="password" :placeholder="$t('password')"
-                       autocomplete="current-password" class="input-dark"
-                       style="font-size:15px;">
+                       autocomplete="current-password" class="input-dark">
               </div>
-              <div v-if="rememberMeEnabled" style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
-                <input type="checkbox" v-model="remember" id="rememberMe" style="accent-color:#dc2626;">
-                <label for="rememberMe" style="font-size:13px; color:rgba(255,255,255,0.5); cursor:pointer;">{{$t('rememberMe')}}</label>
+              <div v-if="rememberMeEnabled" style="display:flex; align-items:center; gap:10px; margin-bottom:24px;">
+                <input type="checkbox" v-model="remember" id="rememberMe" style="width:16px; height:16px; accent-color:#dc2626; cursor:pointer;">
+                <label for="rememberMe" style="font-size:14px; color:var(--text-muted); cursor:pointer; font-weight:500;">{{$t('rememberMe')}}</label>
               </div>
               <button type="submit" class="btn-primary" style="width:100%;"
-                      :disabled="authenticating || !password" :style="(authenticating || !password) ? 'opacity:0.5; cursor:not-allowed;' : ''">
-                <span v-if="authenticating">●●●</span>
+                      :disabled="authenticating || !password">
+                <span v-if="authenticating" class="spinner"></span>
                 <span v-else>{{$t('signIn')}}</span>
               </button>
             </form>
@@ -647,19 +683,20 @@
       </transition>
 
       <!-- Delete Client Modal -->
+      <!-- Delete Client Modal -->
       <transition name="fade">
         <div v-if="clientDelete" class="modal-backdrop" @click.self="clientDelete = null">
-          <div class="modal-box" style="max-width:380px;">
-            <div style="padding:28px;">
-              <div style="width:48px;height:48px;background:rgba(220,38,38,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#fca5a5" style="width:24px;height:24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+          <div class="modal-box" style="max-width:400px;">
+            <div style="padding:32px; text-align:center;">
+              <div style="width:64px; height:64px; background:rgba(220,38,38,0.1); border-radius:20px; display:flex; align-items:center; justify-content:center; margin:0 auto 24px;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#ef4444" style="width:32px; height:32px;"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
               </div>
-              <h3 style="font-size:18px; font-weight:700; color:var(--text-main); margin-bottom:8px;">{{$t('deleteClient')}}</h3>
-              <p style="font-size:13px; color:var(--text-muted); line-height:1.7; margin-bottom:24px;">
-                {{$t('deleteDialog1')}} <strong style="color:#ef4444;">{{ clientDelete && clientDelete.name }}</strong>? {{$t('deleteDialog2')}}
+              <h3 style="font-size:22px; font-weight:800; color:var(--text-main); margin-bottom:12px;">{{$t('deleteClient')}}</h3>
+              <p style="font-size:15px; color:var(--text-muted); line-height:1.6; margin-bottom:32px;">
+                {{$t('deleteDialog1')}} <strong style="color:var(--text-main);">{{ clientDelete && clientDelete.name }}</strong>?<br>{{$t('deleteDialog2')}}
               </p>
-              <div style="display:flex; gap:10px;">
-                <button @click="deleteClient(clientDelete); clientDelete = null;" class="btn-primary" style="flex:1; background:linear-gradient(135deg,#dc2626,#7f1d1d);">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <button @click="deleteClient(clientDelete); clientDelete = null;" class="btn-primary">
                   {{$t('deleteClient')}}
                 </button>
                 <button @click="clientDelete = null" class="btn-ghost">{{$t('cancel')}}</button>
