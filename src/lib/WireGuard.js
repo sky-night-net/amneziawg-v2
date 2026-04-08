@@ -44,13 +44,12 @@ module.exports = class WireGuard {
 
         const protocolVersion = parseInt(Config.WG_PROTOCOL_VERSION, 10) || 1;
         
-        // Randomized ranges for v2 headers if not provided
-        const getRange = (base) => {
-          const start = Math.max(1, base - 500);
-          const end = base + 500;
-          return `${start}-${end}`;
+        // Randomized integers for headers to avoid 'Invalid argument' errors with ranges
+        const getHeader = (base) => {
+          const shift = Math.floor(Math.random() * 1000) - 500;
+          return Math.max(1, base + shift);
         };
-
+        
         config = {
           server: {
             privateKey,
@@ -64,10 +63,10 @@ module.exports = class WireGuard {
             s2: Config.S2,
             s3: Config.S3,
             s4: Config.S4,
-            h1: protocolVersion === 2 ? getRange(Config.H1) : Config.H1,
-            h2: protocolVersion === 2 ? getRange(Config.H2) : Config.H2,
-            h3: protocolVersion === 2 ? getRange(Config.H3) : Config.H3,
-            h4: protocolVersion === 2 ? getRange(Config.H4) : Config.H4,
+            h1: getHeader(Config.H1),
+            h2: getHeader(Config.H2),
+            h3: getHeader(Config.H3),
+            h4: getHeader(Config.H4),
             i1: Config.I1,
             i2: Config.I2,
             i3: Config.I3,
@@ -141,13 +140,22 @@ S1 = ${config.server.s1}
 S2 = ${config.server.s2}
 `;
 
-    // Standard AmneziaWG parameters supported by most binaries
+    // Headers are now strictly integers to maintain binary compatibility
     const h1val = config.server.h1.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
     const h2val = config.server.h2.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
     const h3val = config.server.h3.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
     const h4val = config.server.h4.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
     
     result += `H1 = ${h1val}\nH2 = ${h2val}\nH3 = ${h3val}\nH4 = ${h4val}\n`;
+
+    if (isV2) {
+      result += `S3 = ${config.server.s3 || 0}\nS4 = ${config.server.s4 || 0}\n`;
+      if (config.server.i1) result += `I1 = ${config.server.i1}\n`;
+      if (config.server.i2) result += `I2 = ${config.server.i2}\n`;
+      if (config.server.i3) result += `I3 = ${config.server.i3}\n`;
+      if (config.server.i4) result += `I4 = ${config.server.i4}\n`;
+      if (config.server.i5) result += `I5 = ${config.server.i5}\n`;
+    }
 
     for (const [clientId, client] of Object.entries(config.clients)) {
       if (!client.enabled) continue;
@@ -276,7 +284,7 @@ S1 = ${config.server.s1}
 S2 = ${config.server.s2}
 `;
 
-    // Support standard AmneziaWG parameters for client configs as well to maintain compatibility
+    // Headers (using server's randomized integers for 100% sync)
     const h1 = config.server.h1.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
     const h2 = config.server.h2.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
     const h3 = config.server.h3.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
@@ -287,6 +295,16 @@ H2 = ${h2}
 H3 = ${h3}
 H4 = ${h4}
 `;
+
+    if (isV2) {
+      configuration += `S3 = ${config.server.s3 || 0}
+S4 = ${config.server.s4 || 0}\n`;
+      if (config.server.i1) configuration += `I1 = ${config.server.i1}\n`;
+      if (config.server.i2) configuration += `I2 = ${config.server.i2}\n`;
+      if (config.server.i3) configuration += `I3 = ${config.server.i3}\n`;
+      if (config.server.i4) configuration += `I4 = ${config.server.i4}\n`;
+      if (config.server.i5) configuration += `I5 = ${config.server.i5}\n`;
+    }
 
     configuration += `
 [Peer]

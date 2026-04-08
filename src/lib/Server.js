@@ -79,7 +79,7 @@ module.exports = class Server {
     this.app = app;
 
     app.use(fromNodeMiddleware(expressSession({
-      secret: crypto.randomBytes(256).toString('hex'),
+      secret: PASSWORD_HASH || 'amneziawg-v2-stable-session-secret',
       resave: true,
       saveUninitialized: true,
     })));
