@@ -39,6 +39,10 @@ RUN ln -s /usr/bin/amneziawg-go /usr/bin/wireguard-go && \
 RUN update-alternatives --set iptables /usr/sbin/iptables-legacy || true && \
     update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy || true
 
+# Set WG_PATH and align Amnezia tools config path with wg-easy
+ENV WG_PATH=/etc/amnezia-wg
+RUN mkdir -p /etc/amnezia && ln -s /etc/amnezia-wg /etc/amnezia/amneziawg
+
 # Copy Web UI & install dependencies
 COPY src /app
 WORKDIR /app
