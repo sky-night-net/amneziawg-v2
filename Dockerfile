@@ -13,7 +13,7 @@ WORKDIR /build
 RUN go build -v -o amneziawg-go
 
 # Final Stage: Runtime
-FROM node:18-bookworm-slim
+FROM node:18-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     dumb-init \
