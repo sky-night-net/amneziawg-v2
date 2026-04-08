@@ -97,7 +97,9 @@ new Vue({
 
     awgSettingsDialog: false,
     awgSettings: {
-      jc: '', jmin: '', jmax: '', s1: '', s2: '', h1: '', h2: '', h3: '', h4: '', i1: '', i2: '', i3: '', i4: '', i5: ''
+      protocolVersion: '1',
+      jc: '', jmin: '', jmax: '', s1: '', s2: '', s3: '', s4: '',
+      h1: '', h2: '', h3: '', h4: '', i1: '', i2: '', i3: '', i4: '', i5: ''
     },
     nodeSettingsDialog: false,
     nodeSettings: {
@@ -481,10 +483,52 @@ new Vue({
         this.awgSettingsDialog = true;
       }).catch(err => alert(err.message || err.toString()));
     },
+    handleProtocolChange() {
+      // Internal flag to track if we should actually switch or revert
+      const newVer = this.awgSettings.protocolVersion;
+      const msg = `WARNING: Switching to v${newVer}.0 will WIPE ALL CLIENTS on this server. Continue?`;
+      if (!confirm(msg)) {
+        // Revert UI dropdown
+        this.awgSettings.protocolVersion = newVer === '1' ? '2' : '1';
+        return;
+      }
+      this.fillBestPractices(newVer);
+    },
+    fillBestPractices(version) {
+      if (version === '2') {
+        this.awgSettings.jc = 4;
+        this.awgSettings.jmin = 40;
+        this.awgSettings.jmax = 70;
+        this.awgSettings.s1 = 15;
+        this.awgSettings.s2 = 15;
+        this.awgSettings.s3 = 15;
+        this.awgSettings.s4 = 15;
+        // Random H-Ranges
+        const r = (m) => Math.floor(Math.random() * m) + 1000;
+        this.awgSettings.h1 = `${r(500)}-${r(500)+500}`;
+        this.awgSettings.h2 = `${r(1000)+1000}-${r(1000)+2000}`;
+        this.awgSettings.h3 = `${r(2000)+2000}-${r(2000)+3000}`;
+        this.awgSettings.h4 = `${r(3000)+3000}-${r(3000)+4000}`;
+        this.awgSettings.i1 = '<b 0x16030100f8010000f40303>'; // TLS Mimicry
+      } else {
+        this.awgSettings.jc = 4;
+        this.awgSettings.jmin = 40;
+        this.awgSettings.jmax = 70;
+        this.awgSettings.s1 = 15;
+        this.awgSettings.s2 = 15;
+        this.awgSettings.h1 = Math.floor(Math.random() * 2000000000);
+        this.awgSettings.h2 = Math.floor(Math.random() * 2000000000);
+        this.awgSettings.h3 = Math.floor(Math.random() * 2000000000);
+        this.awgSettings.h4 = Math.floor(Math.random() * 2000000000);
+        this.awgSettings.i1 = '';
+      }
+    },
     saveAwgSettings() {
       this.api.updateAwgSettings(this.awgSettings)
         .then(() => {
           this.awgSettingsDialog = false;
+          alert('Settings saved. Refreshing clients.');
+          this.refresh();
         })
         .catch(err => alert(err.message || err.toString()));
     },
