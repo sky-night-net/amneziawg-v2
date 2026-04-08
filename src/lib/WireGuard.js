@@ -292,12 +292,6 @@ PrivateKey = ${client.privateKey}
 Address = ${client.address}/32
 DNS = ${config.server.dns || Config.WG_DEFAULT_DNS}
 MTU = ${config.server.mtu || Config.WG_MTU}
-
-[Peer]
-PublicKey = ${config.server.publicKey}
-Endpoint = ${config.server.host}:${config.server.port}
-AllowedIPs = ${Config.WG_ALLOWED_IPS}
-PersistentKeepalive = ${Config.WG_PERSISTENT_KEEPALIVE}
 Jc = ${config.server.jc}
 Jmin = ${config.server.jmin}
 Jmax = ${config.server.jmax}
@@ -310,10 +304,16 @@ S2 = ${config.server.s2}
 S4 = ${config.server.s4 || 0}\n`;
     }
 
-    configuration += `H1 = ${config.server.h1}
-H2 = ${config.server.h2}
-H3 = ${config.server.h3}
-H4 = ${config.server.h4}
+    // Header Randomization fallback for v1 (Protocol v1.0 clients do not support ranges)
+    const h1 = isV2 ? config.server.h1 : config.server.h1.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
+    const h2 = isV2 ? config.server.h2 : config.server.h2.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
+    const h3 = isV2 ? config.server.h3 : config.server.h3.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
+    const h4 = isV2 ? config.server.h4 : config.server.h4.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
+
+    configuration += `H1 = ${h1}
+H2 = ${h2}
+H3 = ${h3}
+H4 = ${h4}
 `;
 
     if (isV2) {
@@ -323,6 +323,14 @@ H4 = ${config.server.h4}
       if (config.server.i4) configuration += `I4 = ${config.server.i4}\n`;
       if (config.server.i5) configuration += `I5 = ${config.server.i5}\n`;
     }
+
+    configuration += `
+[Peer]
+PublicKey = ${config.server.publicKey}
+Endpoint = ${config.server.host}:${config.server.port}
+AllowedIPs = ${Config.WG_ALLOWED_IPS}
+PersistentKeepalive = ${Config.WG_PERSISTENT_KEEPALIVE}
+`;
 
     return configuration;
   }
