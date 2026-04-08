@@ -106,7 +106,6 @@ module.exports = class WireGuard {
 
           throw err;
         });
-        await this.__syncConfig();
       }
     }
 
@@ -116,7 +115,6 @@ module.exports = class WireGuard {
   async saveConfig() {
     const config = await this.getConfig();
     await this.__saveConfig(config);
-    await this.__syncConfig();
   }
 
   async __saveConfig(config) {
@@ -507,7 +505,6 @@ PersistentKeepalive = ${Config.WG_PERSISTENT_KEEPALIVE}
 
   async __reloadConfig() {
     await this.__buildConfig();
-    await this.__syncConfig();
   }
 
   async restoreConfiguration(config) {
