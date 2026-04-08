@@ -21,6 +21,8 @@ const {
   readBody,
   setHeader,
   serveStatic,
+  getCookie,
+  deleteCookie,
 } = require('h3');
 
 const WireGuard = require('../services/WireGuard');
@@ -149,8 +151,9 @@ module.exports = class Server {
       .delete('/api/nodes/:id', defineEventHandler(async (event) => {
         const NodeManager = require('./NodeManager');
         const nodes = new NodeManager();
-        const id = event.context.params.id;
-        return await nodes.removeNode(id);
+        const id = getRouterParam(event, 'id');
+        await nodes.removeNode(id);
+        return { success: true };
       }))
       .post('/api/nodes/select', defineEventHandler(async (event) => {
         const { id } = await readBody(event);
@@ -372,7 +375,7 @@ module.exports = class Server {
           return { success: true };
         }
         const NodeManager = require('./NodeManager');
-        return await (new NodeManager()).callAgent(nodeId, '/api/agent/awg-settings', 'post', settings);
+        return await (new NodeManager()).callAgent(nodeId, nodeId, '/api/agent/awg-settings', 'post', settings);
       }))
       .get('/api/wireguard/client', defineEventHandler(async (event) => {
         const { nodeId, isLocal } = await getTarget(event);
@@ -647,6 +650,11 @@ module.exports = class Server {
         const clientId = getRouterParam(event, 'clientId');
         const { expireDate } = await readBody(event);
         return await WireGuard.updateClientExpireDate({ clientId, expireDate });
+      }))
+      .delete('/api/agent/clients/:clientId', defineEventHandler(async (event) => {
+        const clientId = getRouterParam(event, 'clientId');
+        await WireGuard.deleteClient({ clientId });
+        return { success: true };
       }))
     .get('/api/agent/clients/:clientId/qrcode', defineEventHandler(async (event) => {
       const clientId = getRouterParam(event, 'clientId');

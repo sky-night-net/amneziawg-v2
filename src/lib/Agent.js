@@ -22,8 +22,7 @@ const {
   AGENT_TOKEN,
 } = require('../config');
 
-const WireGuard = require('./WireGuard');
-const wireguard = new WireGuard();
+const wireguard = require('../services/WireGuard');
 
 const app = createApp();
 const router = createRouter();
@@ -79,9 +78,9 @@ router.get('/api/agent/clients', defineEventHandler(async () => {
 }));
 
 router.post('/api/agent/clients', defineEventHandler(async (event) => {
-    const { name, expiredAt } = await readBody(event);
+    const { name, expiredDate } = await readBody(event);
     console.log(`[AGENT] Creating client: ${name}`);
-    return await wireguard.createClient({ name, expiredAt });
+    return await wireguard.createClient({ name, expiredDate });
 }));
 
 // Client Operations (Individual)
@@ -94,7 +93,8 @@ router.get('/api/agent/clients/:clientId', defineEventHandler(async (event) => {
 router.delete('/api/agent/clients/:clientId', defineEventHandler(async (event) => {
     const clientId = getRouterParam(event, 'clientId');
     console.log(`[AGENT] Delete request: ${clientId}`);
-    return await wireguard.deleteClient({ clientId });
+    await wireguard.deleteClient({ clientId });
+    return { success: true };
 }));
 
 router.post('/api/agent/clients/:clientId/enable', defineEventHandler(async (event) => {
