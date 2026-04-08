@@ -189,6 +189,41 @@ ${client.preSharedKey ? `PresharedKey = ${client.preSharedKey}\n` : ''
     debug('Config synced.');
   }
 
+  /**
+   * Safe method to add/update/remove a peer in the running kernel without touching Interface settings.
+   */
+  async __syncPeer(clientId) {
+    const config = await this.getConfig();
+    const client = config.clients[clientId];
+    if (!client) {
+      debug(`SyncPeer: Client ${clientId} not found in config, skipping kernel sync.`);
+      return;
+    }
+
+    if (client.enabled) {
+      debug(`SyncPeer: Adding/Updating peer ${clientId} (${client.name}) in kernel...`);
+      // AmneziaWG set syntax is identical to WireGuard for peers
+      // Fix: Removed Bash-specific <( ) syntax which fails in /bin/sh
+      let command = `wg set wg0 peer ${client.publicKey} allowed-ips ${client.address}/32`;
+      
+      if (client.preSharedKey) {
+        const pskPath = path.join('/tmp', `psk_${clientId}`);
+        await fs.writeFile(pskPath, client.preSharedKey);
+        command += ` preshared-key ${pskPath}`;
+        try {
+          await Util.exec(command);
+        } finally {
+          await fs.unlink(pskPath).catch(() => {});
+        }
+      } else {
+        await Util.exec(command);
+      }
+    } else {
+      debug(`SyncPeer: Removing peer ${clientId} from kernel...`);
+      await Util.exec(`wg set wg0 peer ${client.publicKey} remove`);
+    }
+  }
+
   async getClients() {
     const config = await this.getConfig();
     const clients = Object.entries(config.clients).map(([clientId, client]) => ({
@@ -417,6 +452,7 @@ PersistentKeepalive = ${Config.WG_PERSISTENT_KEEPALIVE}
     config.clients[id] = client;
 
     await this.saveConfig();
+    await this.__syncPeer(id);
 
     return client;
   }
@@ -425,6 +461,8 @@ PersistentKeepalive = ${Config.WG_PERSISTENT_KEEPALIVE}
     const config = await this.getConfig();
 
     if (config.clients[clientId]) {
+      const client = config.clients[clientId];
+      await Util.exec(`wg set wg0 peer ${client.publicKey} remove`).catch(() => {});
       delete config.clients[clientId];
       await this.saveConfig();
     }
@@ -437,6 +475,7 @@ PersistentKeepalive = ${Config.WG_PERSISTENT_KEEPALIVE}
     client.updatedAt = new Date();
 
     await this.saveConfig();
+    await this.__syncPeer(clientId);
   }
 
   async generateOneTimeLink({ clientId }) {
@@ -463,6 +502,7 @@ PersistentKeepalive = ${Config.WG_PERSISTENT_KEEPALIVE}
     client.updatedAt = new Date();
 
     await this.saveConfig();
+    await this.__syncPeer(clientId);
   }
 
   async updateClientName({ clientId, name }) {

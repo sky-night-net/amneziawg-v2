@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
     libmnl0 \
+    tcpdump \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy compiled binaries
