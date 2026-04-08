@@ -7,7 +7,7 @@ WORKDIR /build_tools/src
 RUN make
 
 # Stage 2: Build amneziawg-go (userspace WireGuard engine)
-FROM golang:1.22-bookworm AS build_awg_go
+FROM golang:1.24-bookworm AS build_awg_go
 RUN git clone https://github.com/amnezia-vpn/amneziawg-go.git /build
 WORKDIR /build
 RUN go build -v -o amneziawg-go
