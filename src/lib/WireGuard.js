@@ -590,7 +590,17 @@ PersistentKeepalive = ${Config.WG_PERSISTENT_KEEPALIVE}
     config.server.i4 = settings.i4;
     config.server.i5 = settings.i5;
 
-    await this.saveConfig();
+    await this.__saveConfig(config);
+    
+    // Forced restart: AmneziaWG obfuscation params require a fresh interface init
+    debug('Restarting WireGuard interface to apply new obfuscation settings...');
+    await Util.exec('wg-quick down wg0').catch(() => {});
+    await Util.exec('wg-quick up wg0').catch((err) => {
+      debug(`Error during restart: ${err.message}`);
+      throw err;
+    });
+    await this.__syncConfig();
+    debug('Protocol switch/update completed successfully.');
   }
 
   async cronJobEveryMinute() {
