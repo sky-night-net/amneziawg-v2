@@ -116,7 +116,7 @@ docker run -d \
   -e ADMIN_PASSWORD="$ADMIN_PWD" \
   -p $WG_PORT_VAL:$WG_PORT_VAL/udp \
   -p $GUI_PORT:51821/tcp \
-  -p $AGNT_PORT:51821/tcp \
+  -p $AGNT_PORT:$AGNT_PORT/tcp \
   --privileged \
   ghcr.io/sky-night-net/amneziawg-v2:latest
 
