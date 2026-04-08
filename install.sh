@@ -141,11 +141,20 @@ echo -e "${GREEN}Контейнер успешно запущен!${NC}"
 
 # 6. Получение токена и финализация
 echo -e "\n${BLUE}[5/5] Генерация Node Identity...${NC}"
-echo -e "Подождите несколько секунд для генерации токена..."
-sleep 5
+# Надежное получение токена (до 30 секунд ожидания)
+echo -e "Ожидание инициализации сервера и генерации токена..."
+TOKEN=""
+for i in {1..15}; do
+    TOKEN=$(docker exec amnezia-node cat /etc/amnezia/amneziawg/agent_token.json 2>/dev/null | jq -r .token 2>/dev/null || echo "")
+    if [ -n "$TOKEN" ]; then
+        break
+    fi
+    sleep 2
+done
 
-# Чтение токена напрямую из файла внутри контейнера
-TOKEN=$(docker exec amnezia-node cat /etc/amnezia/amneziawg/agent_token.json | jq -r .token)
+if [ -z "$TOKEN" ]; then
+    echo -e "${RED}Ошибка: Не удалось получить токен. Проверьте логи: docker logs amnezia-node${NC}"
+fi
 
 echo -e "\n${GREEN}${BOLD}============================================================${NC}"
 echo -e "${GREEN}${BOLD}🎉 УСТАНОВКА ЗАВЕРШЕНА!${NC}"
