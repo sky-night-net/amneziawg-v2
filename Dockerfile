@@ -8,7 +8,7 @@ RUN go mod download && \
 
 # Stage 2: Build amnezia-wg tools (wg utility)
 FROM alpine:latest AS build_awg_tools
-RUN apk add --no-cache git make build-base
+RUN apk add --no-cache git make build-base libmnl-dev linux-headers
 RUN git clone https://github.com/amnezia-vpn/amnezia-wg.git /build_tools
 WORKDIR /build_tools/src/tools
 RUN make
