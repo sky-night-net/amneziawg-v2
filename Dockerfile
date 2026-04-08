@@ -1,19 +1,4 @@
-# Stage 1: Build amneziawg-go (Userland engine v2.0)
-FROM golang:alpine AS build_awg_go
-RUN apk add --no-cache git make
-RUN git clone https://github.com/amnezia-vpn/amneziawg-go.git /build
-WORKDIR /build
-RUN go mod download && \
-    go build -v -o amneziawg-go
-
-# Stage 2: Build amnezia-wg tools (wg utility)
-FROM alpine:latest AS build_awg_tools
-RUN apk add --no-cache git make build-base pkgconf libmnl-dev linux-headers
-RUN git clone https://github.com/amnezia-vpn/amnezia-wg.git /build_tools
-WORKDIR /build_tools/src/tools
-RUN make
-
-# Stage 3: Build Web UI
+# Stage 1: Build Web UI
 FROM node:18-alpine AS build_node_modules
 COPY src /app
 WORKDIR /app
@@ -30,23 +15,19 @@ RUN apk add --no-cache \
     iproute2 \
     procps
 
-# Copy AWG Binaries
-COPY --from=build_awg_go /build/amneziawg-go /usr/bin/amneziawg-go
-COPY --from=build_awg_tools /build_tools/src/tools/wg /usr/bin/awg
+# Copy official AmneziaWG binaries for the target architecture
+COPY --from=amneziavpn/amnezia-wg:latest /usr/bin/amneziawg-go /usr/bin/amneziawg-go
+COPY --from=amneziavpn/amnezia-wg:latest /usr/bin/awg /usr/bin/awg
+COPY --from=amneziavpn/amnezia-wg:latest /usr/bin/awg-quick /usr/bin/awg-quick
 
-# WireGuard-compatibility symlinks
+# WireGuard-compatibility symlinks (so wg-easy calls work seamlessly)
 RUN ln -s /usr/bin/amneziawg-go /usr/bin/wireguard-go && \
-    ln -s /usr/bin/awg /usr/bin/wg
+    ln -s /usr/bin/awg /usr/bin/wg && \
+    ln -s /usr/bin/awg-quick /usr/bin/wg-quick
 
 # Copy Web UI & Node Modules
 COPY --from=build_node_modules /app /app
 COPY --from=build_node_modules /node_modules /node_modules
-
-# Add custom amnezia-wg-quick wrapper if needed, or use standard wg-quick
-# The amnezia-wg repo usually contains a patched wg-quick.
-COPY --from=build_awg_tools /build_tools/src/tools/wg-quick/linux.bash /usr/bin/awg-quick
-RUN chmod +x /usr/bin/awg-quick && \
-    ln -s /usr/bin/awg-quick /usr/bin/wg-quick
 
 # Copy the needed wg-password scripts
 COPY --from=build_node_modules /app/wgpw.sh /bin/wgpw
