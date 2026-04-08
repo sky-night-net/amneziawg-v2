@@ -1,51 +1,56 @@
-# Stage 1: Build Web UI
-FROM node:18-alpine AS build_node_modules
-COPY src /app
-WORKDIR /app
-RUN npm ci --omit=dev && \
-    mv node_modules /node_modules
+# Stage 1: Build amnezia-wg tools (wg utility)
+FROM debian:bookworm-slim AS build_awg_tools
+RUN apt-get update && apt-get install -y --no-install-recommends git make gcc libc6-dev pkg-config libmnl-dev
+RUN git clone https://github.com/amnezia-vpn/amnezia-wg.git /build_tools
+WORKDIR /build_tools/src/tools
+RUN make
+
+# Stage 2: Build amneziawg-go (Userland engine v2.0)
+FROM golang:1.22-bookworm AS build_awg_go
+RUN git clone https://github.com/amnezia-vpn/amneziawg-go.git /build
+WORKDIR /build
+RUN go build -v -o amneziawg-go
 
 # Final Stage: Runtime
-FROM alpine:latest
-RUN apk add --no-cache \
+FROM node:18-bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     dumb-init \
     iptables \
-    nodejs \
-    bash \
     iproute2 \
-    procps
+    procps \
+    libmnl0 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy official AmneziaWG binaries for the target architecture
-COPY --from=amneziavpn/amnezia-wg:latest /usr/bin/amneziawg-go /usr/bin/amneziawg-go
-COPY --from=amneziavpn/amnezia-wg:latest /usr/bin/awg /usr/bin/awg
-COPY --from=amneziavpn/amnezia-wg:latest /usr/bin/awg-quick /usr/bin/awg-quick
+# Copy binaries
+COPY --from=build_awg_go /build/amneziawg-go /usr/bin/amneziawg-go
+COPY --from=build_awg_tools /build_tools/src/tools/wg /usr/bin/awg
 
-# WireGuard-compatibility symlinks (so wg-easy calls work seamlessly)
-RUN ln -s /usr/bin/amneziawg-go /usr/bin/wireguard-go && \
+# Copy tools
+COPY --from=build_awg_tools /build_tools/src/tools/wg-quick/linux.bash /usr/bin/awg-quick
+RUN chmod +x /usr/bin/awg-quick && \
+    ln -s /usr/bin/amneziawg-go /usr/bin/wireguard-go && \
     ln -s /usr/bin/awg /usr/bin/wg && \
     ln -s /usr/bin/awg-quick /usr/bin/wg-quick
 
-# Copy Web UI & Node Modules
-COPY --from=build_node_modules /app /app
-COPY --from=build_node_modules /node_modules /node_modules
+# Use iptables-legacy wrapper for Docker compatibility
+RUN update-alternatives --set iptables /usr/sbin/iptables-legacy || true && \
+    update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy || true
+
+# Copy Web UI & Install Dependencies
+COPY src /app
+WORKDIR /app
+RUN npm ci --omit=dev
 
 # Copy the needed wg-password scripts
-COPY --from=build_node_modules /app/wgpw.sh /bin/wgpw
-RUN chmod +x /bin/wgpw
+RUN cp /app/wgpw.sh /bin/wgpw && chmod +x /bin/wgpw
 
-# Use iptables-legacy (often needed in Docker)
-RUN apk add --no-cache iptables-archive && \
-    ln -sf /sbin/iptables-legacy /sbin/iptables && \
-    ln -sf /sbin/ip6tables-legacy /sbin/ip6tables
-
-# Set Environment
+# Config default values
 ENV DEBUG=Server,WireGuard
 ENV WG_QUICK_USERSPACE_IMPLEMENTATION=amneziawg-go
 
-# Run Web UI
-WORKDIR /app
 EXPOSE 51821/tcp
 EXPOSE 51820/udp
 EXPOSE 161/tcp
 
-CMD ["/usr/bin/dumb-init", "node", "server.js"]
+CMD ["dumb-init", "node", "server.js"]
