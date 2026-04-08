@@ -50,7 +50,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 
-const TOKEN_FILE = '/etc/amnezia/amneziawg/agent_token.json';
+const TOKEN_FILE = '/etc/amnezia-wg/agent_token.json';
 let agentToken = process.env.AGENT_TOKEN || process.env.HUB_TOKEN;
 
 if (!agentToken) {
@@ -78,22 +78,15 @@ const getRandomInt = (min, max) => min + Math.floor(Math.random() * (max - min))
 const getRandomJunkSize = () => getRandomInt(15, 150);
 const getRandomHeader = () => getRandomInt(1, 2_147_483_647);
 
-module.exports.WG_PROTOCOL_VERSION = process.env.WG_PROTOCOL_VERSION || '1';
 module.exports.JC = process.env.JC || getRandomInt(3, 10);
 module.exports.JMIN = process.env.JMIN || 50;
 module.exports.JMAX = process.env.JMAX || 1000;
-module.exports.S1 = process.env.S1 || 15;
-module.exports.S2 = process.env.S2 || 15;
-module.exports.S3 = process.env.S3 || 15;
-module.exports.S4 = process.env.S4 || 15;
-
-// For v1: Single integer. For v2: Range "min-max"
+module.exports.S1 = process.env.S1 || getRandomJunkSize();
+module.exports.S2 = process.env.S2 || getRandomJunkSize();
 module.exports.H1 = process.env.H1 || getRandomHeader();
 module.exports.H2 = process.env.H2 || getRandomHeader();
 module.exports.H3 = process.env.H3 || getRandomHeader();
 module.exports.H4 = process.env.H4 || getRandomHeader();
-
-// Default mimicry for v2 (Empty by default for v1 stability)
 module.exports.I1 = process.env.I1 || '';
 module.exports.I2 = process.env.I2 || '';
 module.exports.I3 = process.env.I3 || '';

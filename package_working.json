@@ -1,9 +1,9 @@
 {
   "release": {
-    "version": "19"
+    "version": "18"
   },
   "name": "wg-easy",
-  "version": "1.5.0",
+  "version": "1.0.1",
   "description": "The easiest way to run WireGuard VPN + Web-based Admin UI.",
   "main": "server.js",
   "scripts": {
