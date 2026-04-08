@@ -118,7 +118,7 @@ fi
 docker run -d \
   --name amnezia-node \
   --restart unless-stopped \
-  -v ~/.amnezia-wg:/etc/amnezia-wg \
+  -v ~/.amnezia-wg:/etc/amnezia/amneziawg \
   -v /etc/localtime:/etc/localtime:ro \
   -v /etc/timezone:/etc/timezone:ro \
   -e WG_PORT=$WG_PORT_VAL \
