@@ -375,7 +375,7 @@ module.exports = class Server {
           return { success: true };
         }
         const NodeManager = require('./NodeManager');
-        return await (new NodeManager()).callAgent(nodeId, nodeId, '/api/agent/awg-settings', 'post', settings);
+        return await (new NodeManager()).callAgent(nodeId, '/api/agent/awg-settings', 'post', settings);
       }))
       .get('/api/wireguard/client', defineEventHandler(async (event) => {
         const { nodeId, isLocal } = await getTarget(event);
