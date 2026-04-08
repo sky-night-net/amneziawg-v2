@@ -65,26 +65,33 @@ AUTO_IP=$(curl -s --connect-timeout 2 ifconfig.me || curl -s --connect-timeout 2
 
 echo -e "Нажмите ENTER, чтобы использовать значения по умолчанию."
 
-read -p "Имя этого сервера (напр. Sofia-Hub): " NODE_NAME < /dev/tty
+read -e -p "Имя этого сервера (напр. Sofia-Hub): " NODE_NAME < /dev/tty
 NODE_NAME=${NODE_NAME:-"My Server"}
+NODE_NAME=$(echo "$NODE_NAME" | tr -cd '[:print:]')
 
-read -p "Публичный IP сервера (по умолчанию $AUTO_IP): " WG_HOST < /dev/tty
+read -e -p "Публичный IP сервера (по умолчанию $AUTO_IP): " WG_HOST < /dev/tty
 WG_HOST=${WG_HOST:-$AUTO_IP}
+WG_HOST=$(echo "$WG_HOST" | tr -cd '0-9.a-zA-Z-')
 
-read -p "Пароль администратора (по умолчанию 'admin'): " ADMIN_PWD < /dev/tty
+read -e -p "Пароль администратора (по умолчанию 'admin'): " ADMIN_PWD < /dev/tty
 ADMIN_PWD=${ADMIN_PWD:-"admin"}
+ADMIN_PWD=$(echo "$ADMIN_PWD" | tr -cd '[:print:]')
 
-read -p "Порт Web UI (по умолчанию 51821): " GUI_PORT < /dev/tty
+read -e -p "Порт Web UI (по умолчанию 51821): " GUI_PORT < /dev/tty
 GUI_PORT=${GUI_PORT:-51821}
+GUI_PORT=$(echo "$GUI_PORT" | tr -cd '0-9')
 
-read -p "Порт WireGuard UDP (по умолчанию 51820): " WG_PORT_VAL < /dev/tty
+read -e -p "Порт WireGuard UDP (по умолчанию 51820): " WG_PORT_VAL < /dev/tty
 WG_PORT_VAL=${WG_PORT_VAL:-51820}
+WG_PORT_VAL=$(echo "$WG_PORT_VAL" | tr -cd '0-9')
 
-read -p "Порт управления / Agent (по умолчанию 161): " AGNT_PORT < /dev/tty
+read -e -p "Порт управления / Agent (по умолчанию 161): " AGNT_PORT < /dev/tty
 AGNT_PORT=${AGNT_PORT:-161}
+AGNT_PORT=$(echo "$AGNT_PORT" | tr -cd '0-9')
 
-read -p "MTU сети (по умолчанию 1420, для сложных систем 1280): " WG_MTU < /dev/tty
+read -e -p "MTU сети (по умолчанию 1420, для сложных систем 1280): " WG_MTU < /dev/tty
 WG_MTU=${WG_MTU:-1420}
+WG_MTU=$(echo "$WG_MTU" | tr -cd '0-9')
 
 # Умная очистка имени от лишних "Hub", чтобы не было "Hub Hub"
 NODE_NAME=$(echo "$NODE_NAME" | sed 's/ Hub//g' | sed 's/ hub//g' | xargs)
