@@ -216,6 +216,7 @@ module.exports = class Server {
           authenticated,
           setupComplete: config.server.setupComplete,
           selectedNodeId: event.node.req.session.selectedNodeId || 'local',
+          nodeName: require('../config').NODE_NAME,
         };
       }))
       .get('/api/setup-status', defineEventHandler(async () => {

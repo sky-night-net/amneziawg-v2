@@ -64,6 +64,7 @@ module.exports = class WireGuard {
             host: autoHost,
             port: Config.WG_PORT,
             device: Config.WG_DEVICE,
+            mtu: Config.WG_MTU,
             passwordHash,
             setupComplete,
           },
@@ -455,7 +456,20 @@ Endpoint = ${config.server.host}:${config.server.port || Config.WG_CONFIG_PORT}`
 
   async restoreConfiguration(config) {
     debug('Starting configuration restore process.');
-    const _config = JSON.parse(config);
+    let _config = JSON.parse(config);
+
+    // Smart Restore: If input is an array, treat it as a list of clients only
+    if (Array.isArray(_config)) {
+      debug('Restoring clients only (Merging into existing config).');
+      const currentConfig = await this.getConfig();
+      currentConfig.clients = {}; // Clear existing clients or merge? Typically restore replaces list.
+      for (const client of _config) {
+        if (!client.id) client.id = crypto.randomUUID(); // Ensure IDs exist
+        currentConfig.clients[client.id] = client;
+      }
+      _config = currentConfig;
+    }
+
     await this.__saveConfig(_config);
     await this.__reloadConfig();
     debug('Configuration restore process completed.');

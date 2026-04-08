@@ -83,6 +83,12 @@ WG_PORT_VAL=${WG_PORT_VAL:-51820}
 read -p "Порт управления / Agent (по умолчанию 161): " AGNT_PORT < /dev/tty
 AGNT_PORT=${AGNT_PORT:-161}
 
+read -p "MTU сети (по умолчанию 1420, для сложных систем 1280): " WG_MTU < /dev/tty
+WG_MTU=${WG_MTU:-1420}
+
+# Умная очистка имени от лишних "Hub", чтобы не было "Hub Hub"
+NODE_NAME=$(echo "$NODE_NAME" | sed 's/ Hub//g' | sed 's/ hub//g' | xargs)
+
 # 6. Развертывание контейнера
 echo -e "\n${BLUE}[5/5] Развертывание AmneziaWG Node...${NC}"
 
@@ -113,12 +119,16 @@ docker run -d \
   -e WG_DEVICE=eth0 \
   -e NODE_NAME="$NODE_NAME" \
   -e WG_HOST="$WG_HOST" \
+  -e WG_MTU="$WG_MTU" \
   -e ADMIN_PASSWORD="$ADMIN_PWD" \
   -p $WG_PORT_VAL:$WG_PORT_VAL/udp \
   -p $GUI_PORT:51821/tcp \
   -p $AGNT_PORT:$AGNT_PORT/tcp \
   --privileged \
   ghcr.io/sky-night-net/amneziawg-v2:latest
+
+# Автоматическая подстройка MSS для проблемных сетей (MTU фиксируется аппаратно на 1300)
+iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu || true
 
 echo -e "${GREEN}Контейнер успешно запущен!${NC}"
 

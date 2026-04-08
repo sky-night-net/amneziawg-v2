@@ -612,7 +612,7 @@
               <img src="./img/logo.svg" />
               <div>
                 <div class="brand">AmneziaWG</div>
-                <div class="section-label" style="margin-top:1px;">{{ selectedNode ? selectedNode.name : 'Multi-Node' }} Hub</div>
+                <div class="section-label" style="margin-top:1px;">{{ selectedNode ? (selectedNode.name.toLowerCase().endsWith('hub') ? selectedNode.name : selectedNode.name + ' Hub') : 'Multi-Node Hub' }}</div>
               </div>
             </div>
 

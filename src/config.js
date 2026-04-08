@@ -4,6 +4,7 @@ const { release: { version } } = require('./package.json');
 
 module.exports.RELEASE = version;
 module.exports.PORT = process.env.PORT || '51821';
+module.exports.NODE_NAME = process.env.NODE_NAME || 'Amnezia Hub';
 module.exports.WEBUI_HOST = process.env.WEBUI_HOST || '0.0.0.0';
 module.exports.PASSWORD_HASH = process.env.PASSWORD_HASH;
 module.exports.ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
@@ -13,7 +14,7 @@ module.exports.WG_DEVICE = process.env.WG_DEVICE || 'eth0';
 module.exports.WG_HOST = process.env.WG_HOST || null;
 module.exports.WG_PORT = process.env.WG_PORT || '51820';
 module.exports.WG_CONFIG_PORT = process.env.WG_CONFIG_PORT || process.env.WG_PORT || '51820';
-module.exports.WG_MTU = process.env.WG_MTU || null;
+module.exports.WG_MTU = process.env.WG_MTU || '1420';
 module.exports.WG_PERSISTENT_KEEPALIVE = process.env.WG_PERSISTENT_KEEPALIVE || '25';
 module.exports.WG_DEFAULT_ADDRESS = process.env.WG_DEFAULT_ADDRESS || '10.8.0.x';
 module.exports.WG_DEFAULT_DNS = typeof process.env.WG_DEFAULT_DNS === 'string'

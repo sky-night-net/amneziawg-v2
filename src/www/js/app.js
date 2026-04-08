@@ -105,6 +105,7 @@ new Vue({
       port: '',
       password: '',
     },
+    nodeName: 'Amnezia Hub',
 
     nodes: [],
     selectedNodeId: 'local',
@@ -522,7 +523,7 @@ new Vue({
     loadNodes() {
       this.api.getNodes().then(nodes => {
         // Always include local node
-        const localNode = { id: 'local', name: 'Offices Hub', url: 'local' };
+        const localNode = { id: 'local', name: this.nodeName, url: 'local' };
         this.nodes = [localNode, ...nodes.filter(n => n.id !== 'local')];
         
         // Fetch status for all
@@ -535,7 +536,7 @@ new Vue({
         });
       }).catch(err => {
         console.error('Failed to load nodes:', err);
-        this.nodes = [{ id: 'local', name: 'Offices Hub', url: 'local' }];
+        this.nodes = [{ id: 'local', name: this.nodeName, url: 'local' }];
       });
     },
     selectNode(id) {
@@ -590,6 +591,7 @@ new Vue({
         this.requiresPassword = session.requiresPassword;
         this.setupComplete = session.setupComplete;
         this.selectedNodeId = session.selectedNodeId || 'local';
+        this.nodeName = session.nodeName || 'Amnezia Hub';
 
         if (this.setupComplete) {
           if (this.authenticated) {
