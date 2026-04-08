@@ -46,8 +46,10 @@ module.exports = class WireGuard {
         
         // Randomized integers for headers to avoid 'Invalid argument' errors with ranges
         const getHeader = (base) => {
-          const shift = Math.floor(Math.random() * 1000) - 500;
-          return Math.max(1, base + shift);
+          const getRandomInt = (min, max) => min + Math.floor(Math.random() * (max - min));
+          const getRandomJunkSize = () => getRandomInt(15, 150);
+          const getRandomHeader = () => getRandomInt(1000, 65000); // More conservative 16-bit-ish range for maximum compatibility
+          return base || getRandomHeader();
         };
         
         config = {
@@ -343,7 +345,6 @@ PersistentKeepalive = ${Config.WG_PERSISTENT_KEEPALIVE}
       }
       throw err;
     });
-    await this.__syncConfig();
     
     this.__configPromise = Promise.resolve(config);
     return { success: true };
@@ -601,7 +602,6 @@ PersistentKeepalive = ${Config.WG_PERSISTENT_KEEPALIVE}
       debug(`Error during restart: ${err.message}`);
       throw err;
     });
-    await this.__syncConfig();
     debug('Protocol switch/update completed successfully.');
   }
   
