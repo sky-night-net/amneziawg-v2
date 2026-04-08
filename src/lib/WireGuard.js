@@ -127,8 +127,9 @@ module.exports = class WireGuard {
 # Server
 [Interface]
 PrivateKey = ${config.server.privateKey}
-Address = ${config.server.address}/24
+Address = ${config.server.address}${config.server.address.includes('/') ? '' : '/24'}
 ListenPort = ${config.server.port || Config.WG_PORT}
+MTU = ${config.server.mtu || Config.WG_MTU}
 PreUp = ${Config.WG_PRE_UP}
 PostUp = ${Config.WG_POST_UP}
 PreDown = ${Config.WG_PRE_DOWN}
@@ -140,6 +141,10 @@ S1 = ${config.server.s1}
 S2 = ${config.server.s2}
 `;
 
+    if (isV2) {
+      result += `S3 = ${config.server.s3 || 0}\nS4 = ${config.server.s4 || 0}\n`;
+    }
+
     // Headers are now strictly integers to maintain binary compatibility
     const h1val = config.server.h1.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
     const h2val = config.server.h2.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
@@ -149,7 +154,6 @@ S2 = ${config.server.s2}
     result += `H1 = ${h1val}\nH2 = ${h2val}\nH3 = ${h3val}\nH4 = ${h4val}\n`;
 
     if (isV2) {
-      result += `S3 = ${config.server.s3 || 0}\nS4 = ${config.server.s4 || 0}\n`;
       if (config.server.i1) result += `I1 = ${config.server.i1}\n`;
       if (config.server.i2) result += `I2 = ${config.server.i2}\n`;
       if (config.server.i3) result += `I3 = ${config.server.i3}\n`;
@@ -271,7 +275,6 @@ ${client.preSharedKey ? `PresharedKey = ${client.preSharedKey}\n` : ''
     const config = await this.getConfig();
     const client = await this.getClient({ clientId });
     const isV2 = (parseInt(config.server.protocolVersion, 10) === 2);
-
     let configuration = `[Interface]
 PrivateKey = ${client.privateKey}
 Address = ${client.address}/32
@@ -283,6 +286,11 @@ Jmax = ${config.server.jmax}
 S1 = ${config.server.s1}
 S2 = ${config.server.s2}
 `;
+
+    if (isV2) {
+      configuration += `S3 = ${config.server.s3 || 0}
+S4 = ${config.server.s4 || 0}\n`;
+    }
 
     // Headers (using server's randomized integers for 100% sync)
     const h1 = config.server.h1.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
@@ -297,8 +305,6 @@ H4 = ${h4}
 `;
 
     if (isV2) {
-      configuration += `S3 = ${config.server.s3 || 0}
-S4 = ${config.server.s4 || 0}\n`;
       if (config.server.i1) configuration += `I1 = ${config.server.i1}\n`;
       if (config.server.i2) configuration += `I2 = ${config.server.i2}\n`;
       if (config.server.i3) configuration += `I3 = ${config.server.i3}\n`;
@@ -597,6 +603,19 @@ PersistentKeepalive = ${Config.WG_PERSISTENT_KEEPALIVE}
     });
     await this.__syncConfig();
     debug('Protocol switch/update completed successfully.');
+  }
+  
+  async getState() {
+    let isUp = false;
+    let peerCount = 0;
+    try {
+      const dump = await Util.exec('wg show wg0 dump', { log: false });
+      isUp = true;
+      peerCount = dump.trim().split('\n').slice(1).length;
+    } catch (err) {
+      isUp = false;
+    }
+    return { isUp, peerCount };
   }
 
   async cronJobEveryMinute() {

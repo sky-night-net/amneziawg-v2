@@ -360,6 +360,12 @@ module.exports = class Server {
         debug(`Deleted Session: ${sessionId}`);
         return { success: true };
       }))
+      .get('/api/agent/status', defineEventHandler(async () => {
+        return WireGuard.getState();
+      }))
+      .get('/api/agent/clients', defineEventHandler(async () => {
+        return WireGuard.getClients();
+      }))
       .get('/api/awg-settings', defineEventHandler(async (event) => {
         const { nodeId, isLocal } = await getTarget(event);
         if (isLocal) return WireGuard.getAwgSettings();
@@ -376,6 +382,12 @@ module.exports = class Server {
         }
         const NodeManager = require('./NodeManager');
         return await (new NodeManager()).callAgent(nodeId, '/api/agent/awg-settings', 'post', settings);
+      }))
+      .get('/api/wireguard/status', defineEventHandler(async (event) => {
+        const { nodeId, isLocal } = await getTarget(event);
+        if (isLocal) return WireGuard.getState();
+        const NodeManager = require('./NodeManager');
+        return await (new NodeManager()).callAgent(nodeId, '/api/agent/status');
       }))
       .get('/api/wireguard/client', defineEventHandler(async (event) => {
         const { nodeId, isLocal } = await getTarget(event);
