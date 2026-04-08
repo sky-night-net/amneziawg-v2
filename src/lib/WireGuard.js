@@ -141,22 +141,13 @@ S1 = ${config.server.s1}
 S2 = ${config.server.s2}
 `;
 
-    if (isV2) {
-      result += `S3 = ${config.server.s3 || 0}\nS4 = ${config.server.s4 || 0}\n`;
-      result += `H1 = ${config.server.h1}\nH2 = ${config.server.h2}\nH3 = ${config.server.h3}\nH4 = ${config.server.h4}\n`;
-      if (config.server.i1) result += `I1 = ${config.server.i1}\n`;
-      if (config.server.i2) result += `I2 = ${config.server.i2}\n`;
-      if (config.server.i3) result += `I3 = ${config.server.i3}\n`;
-      if (config.server.i4) result += `I4 = ${config.server.i4}\n`;
-      if (config.server.i5) result += `I5 = ${config.server.i5}\n`;
-    } else {
-      // v1 fallback: ensure H1-H4 are strictly integers (no ranges)
-      const h1v1 = config.server.h1.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
-      const h2v1 = config.server.h2.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
-      const h3v1 = config.server.h3.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
-      const h4v1 = config.server.h4.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
-      result += `H1 = ${h1v1}\nH2 = ${h2v1}\nH3 = ${h3v1}\nH4 = ${h4v1}\n`;
-    }
+    // Standard AmneziaWG parameters supported by most binaries
+    const h1val = config.server.h1.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
+    const h2val = config.server.h2.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
+    const h3val = config.server.h3.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
+    const h4val = config.server.h4.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
+    
+    result += `H1 = ${h1val}\nH2 = ${h2val}\nH3 = ${h3val}\nH4 = ${h4val}\n`;
 
     for (const [clientId, client] of Object.entries(config.clients)) {
       if (!client.enabled) continue;
@@ -285,30 +276,17 @@ S1 = ${config.server.s1}
 S2 = ${config.server.s2}
 `;
 
-    if (isV2) {
-      configuration += `S3 = ${config.server.s3 || 0}
-S4 = ${config.server.s4 || 0}\n`;
-    }
-
-    // Header Randomization fallback for v1 (Protocol v1.0 clients do not support ranges)
-    const h1 = isV2 ? config.server.h1 : config.server.h1.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
-    const h2 = isV2 ? config.server.h2 : config.server.h2.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
-    const h3 = isV2 ? config.server.h3 : config.server.h3.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
-    const h4 = isV2 ? config.server.h4 : config.server.h4.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
+    // Support standard AmneziaWG parameters for client configs as well to maintain compatibility
+    const h1 = config.server.h1.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
+    const h2 = config.server.h2.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
+    const h3 = config.server.h3.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
+    const h4 = config.server.h4.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
 
     configuration += `H1 = ${h1}
 H2 = ${h2}
 H3 = ${h3}
 H4 = ${h4}
 `;
-
-    if (isV2) {
-      if (config.server.i1) configuration += `I1 = ${config.server.i1}\n`;
-      if (config.server.i2) configuration += `I2 = ${config.server.i2}\n`;
-      if (config.server.i3) configuration += `I3 = ${config.server.i3}\n`;
-      if (config.server.i4) configuration += `I4 = ${config.server.i4}\n`;
-      if (config.server.i5) configuration += `I5 = ${config.server.i5}\n`;
-    }
 
     configuration += `
 [Peer]
