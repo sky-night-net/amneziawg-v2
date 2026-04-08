@@ -1,14 +1,14 @@
 # Stage 1: Build amneziawg-tools (awg, awg-quick)
 FROM debian:bookworm-slim AS build_awg_tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git make gcc libc6-dev pkg-config libmnl-dev
-RUN git clone https://github.com/amnezia-vpn/amneziawg-tools.git /build_tools
+    git make gcc libc6-dev pkg-config libmnl-dev ca-certificates
+RUN git clone --depth 1 https://github.com/amnezia-vpn/amneziawg-tools.git /build_tools
 WORKDIR /build_tools/src
 RUN make
 
 # Stage 2: Build amneziawg-go (userspace WireGuard engine)
 FROM golang:1.24-bookworm AS build_awg_go
-RUN git clone https://github.com/amnezia-vpn/amneziawg-go.git /build
+RUN git clone --depth 1 https://github.com/amnezia-vpn/amneziawg-go.git /build
 WORKDIR /build
 RUN go build -v -o amneziawg-go
 
