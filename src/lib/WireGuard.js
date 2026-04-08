@@ -143,13 +143,20 @@ S2 = ${config.server.s2}
 
     if (isV2) {
       result += `S3 = ${config.server.s3 || 0}\nS4 = ${config.server.s4 || 0}\n`;
+      result += `H1 = ${config.server.h1}\nH2 = ${config.server.h2}\nH3 = ${config.server.h3}\nH4 = ${config.server.h4}\n`;
+      if (config.server.i1) result += `I1 = ${config.server.i1}\n`;
+      if (config.server.i2) result += `I2 = ${config.server.i2}\n`;
+      if (config.server.i3) result += `I3 = ${config.server.i3}\n`;
+      if (config.server.i4) result += `I4 = ${config.server.i4}\n`;
+      if (config.server.i5) result += `I5 = ${config.server.i5}\n`;
+    } else {
+      // v1 fallback: ensure H1-H4 are strictly integers (no ranges)
+      const h1v1 = config.server.h1.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
+      const h2v1 = config.server.h2.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
+      const h3v1 = config.server.h3.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
+      const h4v1 = config.server.h4.toString().split('-')[0].replace(/[^0-9]/g, '') || '0';
+      result += `H1 = ${h1v1}\nH2 = ${h2v1}\nH3 = ${h3v1}\nH4 = ${h4v1}\n`;
     }
-
-    result += `H1 = ${config.server.h1}
-H2 = ${config.server.h2}
-H3 = ${config.server.h3}
-H4 = ${config.server.h4}
-${config.server.i1 ? `I1 = ${config.server.i1}\n` : ''}${config.server.i2 ? `I2 = ${config.server.i2}\n` : ''}${config.server.i3 ? `I3 = ${config.server.i3}\n` : ''}${config.server.i4 ? `I4 = ${config.server.i4}\n` : ''}${config.server.i5 ? `I5 = ${config.server.i5}\n` : ''}`;
 
     for (const [clientId, client] of Object.entries(config.clients)) {
       if (!client.enabled) continue;

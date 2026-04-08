@@ -1,46 +1,70 @@
-# As a workaround we have to build on nodejs 18
-# nodejs 20 hangs on build with armv6/armv7
-FROM docker.io/library/node:18-alpine AS build_node_modules
+# Stage 1: Build amneziawg-go (Userland engine v2.0)
+FROM golang:alpine AS build_awg_go
+RUN apk add --no-cache git make
+RUN git clone https://github.com/amnezia-vpn/amneziawg-go.git /build
+WORKDIR /build
+RUN go mod download && \
+    go build -v -o amneziawg-go
 
-# Copy Web UI
+# Stage 2: Build amnezia-wg tools (wg utility)
+FROM alpine:latest AS build_awg_tools
+RUN apk add --no-cache git make build-base
+RUN git clone https://github.com/amnezia-vpn/amnezia-wg.git /build_tools
+WORKDIR /build_tools/src/tools
+RUN make
+
+# Stage 3: Build Web UI
+FROM node:18-alpine AS build_node_modules
 COPY src /app
 WORKDIR /app
-RUN npm ci --omit=dev &&\
+RUN npm ci --omit=dev && \
     mv node_modules /node_modules
 
-# Copy build result to a new image.
-# This saves a lot of disk space.
-FROM amneziavpn/amnezia-wg:latest
-HEALTHCHECK CMD /usr/bin/timeout 5s /bin/sh -c "/usr/bin/wg show | /bin/grep -q interface || exit 1" --interval=1m --timeout=5s --retries=3
-COPY --from=build_node_modules /app /app
+# Final Stage: Runtime
+FROM alpine:latest
+RUN apk add --no-cache \
+    dumb-init \
+    iptables \
+    nodejs \
+    bash \
+    iproute2 \
+    procps
 
-# Move node_modules one directory up, so during development
-# we don't have to mount it in a volume.
-# This results in much faster reloading!
-#
-# Also, some node_modules might be native, and
-# the architecture & OS of your development machine might differ
-# than what runs inside of docker.
+# Copy AWG Binaries
+COPY --from=build_awg_go /build/amneziawg-go /usr/bin/amneziawg-go
+COPY --from=build_awg_tools /build_tools/src/tools/wg /usr/bin/awg
+
+# WireGuard-compatibility symlinks
+RUN ln -s /usr/bin/amneziawg-go /usr/bin/wireguard-go && \
+    ln -s /usr/bin/awg /usr/bin/wg
+
+# Copy Web UI & Node Modules
+COPY --from=build_node_modules /app /app
 COPY --from=build_node_modules /node_modules /node_modules
+
+# Add custom amnezia-wg-quick wrapper if needed, or use standard wg-quick
+# The amnezia-wg repo usually contains a patched wg-quick.
+COPY --from=build_awg_tools /build_tools/src/tools/wg-quick/linux.bash /usr/bin/awg-quick
+RUN chmod +x /usr/bin/awg-quick && \
+    ln -s /usr/bin/awg-quick /usr/bin/wg-quick
 
 # Copy the needed wg-password scripts
 COPY --from=build_node_modules /app/wgpw.sh /bin/wgpw
 RUN chmod +x /bin/wgpw
 
-# Install Linux packages
-RUN apk add --no-cache \
-    dpkg \
-    dumb-init \
-    iptables \
-    nodejs \
-    npm
-
-# Use iptables-legacy
-RUN update-alternatives --install /sbin/iptables iptables /sbin/iptables-legacy 10 --slave /sbin/iptables-restore iptables-restore /sbin/iptables-legacy-restore --slave /sbin/iptables-save iptables-save /sbin/iptables-legacy-save
+# Use iptables-legacy (often needed in Docker)
+RUN apk add --no-cache iptables-archive && \
+    ln -sf /sbin/iptables-legacy /sbin/iptables && \
+    ln -sf /sbin/ip6tables-legacy /sbin/ip6tables
 
 # Set Environment
 ENV DEBUG=Server,WireGuard
+ENV WG_QUICK_USERSPACE_IMPLEMENTATION=amneziawg-go
 
 # Run Web UI
 WORKDIR /app
+EXPOSE 51821/tcp
+EXPOSE 51820/udp
+EXPOSE 161/tcp
+
 CMD ["/usr/bin/dumb-init", "node", "server.js"]
