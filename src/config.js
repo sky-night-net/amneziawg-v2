@@ -50,7 +50,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 
-const TOKEN_FILE = '/etc/amnezia-wg/agent_token.json';
+const TOKEN_FILE = '/etc/amnezia/amneziawg/agent_token.json';
 let agentToken = process.env.AGENT_TOKEN || process.env.HUB_TOKEN;
 
 if (!agentToken) {

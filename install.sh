@@ -145,7 +145,7 @@ echo -e "Подождите несколько секунд для генера�
 sleep 5
 
 # Чтение токена напрямую из файла внутри контейнера
-TOKEN=$(docker exec amnezia-node cat /etc/amnezia-wg/agent_token.json | jq -r .token)
+TOKEN=$(docker exec amnezia-node cat /etc/amnezia/amneziawg/agent_token.json | jq -r .token)
 
 echo -e "\n${GREEN}${BOLD}============================================================${NC}"
 echo -e "${GREEN}${BOLD}🎉 УСТАНОВКА ЗАВЕРШЕНА!${NC}"
