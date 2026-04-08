@@ -266,21 +266,7 @@ ${client.preSharedKey ? `PresharedKey = ${client.preSharedKey}\n` : ''
     return client;
   }
 
-  async updateAwgSettings(settings) {
-    const config = await this.getConfig();
-    
-    // Wipe logic: If protocol version changes, remove all clients
-    const oldVersion = parseInt(config.server.protocolVersion, 10) || 1;
-    const newVersion = parseInt(settings.protocolVersion, 10) || 1;
-    
-    if (oldVersion !== newVersion) {
-      debug(`Protocol version changed from v${oldVersion} to v${newVersion}. Wiping all clients.`);
-      config.clients = {};
-    }
 
-    Object.assign(config.server, settings);
-    await this.saveConfig();
-  }
 
   async getClientConfiguration({ clientId }) {
     const config = await this.getConfig();
@@ -577,6 +563,18 @@ PersistentKeepalive = ${Config.WG_PERSISTENT_KEEPALIVE}
 
   async updateAwgSettings(settings) {
     const config = await this.getConfig();
+    
+    // Wipe logic: If protocol version changes, remove all clients
+    const oldVersion = parseInt(config.server.protocolVersion, 10) || 1;
+    const newVersion = parseInt(settings.protocolVersion, 10) || 1;
+    
+    if (oldVersion !== newVersion) {
+      debug(`Protocol version changed from v${oldVersion} to v${newVersion}. Wiping all clients.`);
+      config.clients = {};
+    }
+
+    // Explicitly update all AmneziaWG specific fields
+    config.server.protocolVersion = newVersion;
     config.server.jc = settings.jc;
     config.server.jmin = settings.jmin;
     config.server.jmax = settings.jmax;
@@ -591,6 +589,7 @@ PersistentKeepalive = ${Config.WG_PERSISTENT_KEEPALIVE}
     config.server.i3 = settings.i3;
     config.server.i4 = settings.i4;
     config.server.i5 = settings.i5;
+
     await this.saveConfig();
   }
 
